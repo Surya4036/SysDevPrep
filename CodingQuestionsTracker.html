@@ -488,6 +488,30 @@ background: var(--rule);
 color: var(--ink);
 }
 
+/* LeetCode link icon */
+.lc-link {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 22px;
+height: 22px;
+border-radius: 3px;
+text-decoration: none;
+color: var(--ink-muted);
+transition: all 0.15s;
+flex-shrink: 0;
+}
+
+.lc-link:hover {
+background: #ffa116;
+color: white;
+}
+
+.lc-link svg {
+width: 12px;
+height: 12px;
+}
+
 /* Problem notes panel */
 .prob-notes {
 display: none;
@@ -1063,6 +1087,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p1')">Two Sum</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/two-sum/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p1')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p1">
@@ -1107,6 +1132,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p2')">Contains Duplicate</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/contains-duplicate/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p2')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p2">
@@ -1151,6 +1177,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p3')">Product of Array Except Self</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p3')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p3">
@@ -1195,6 +1222,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p4')">Top K Frequent Elements</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/top-k-frequent-elements/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p4')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p4">
@@ -1239,6 +1267,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p5')">Subarray Sum Equals K</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/subarray-sum-equals-k/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p5')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p5">
@@ -1283,6 +1312,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p6')">Merge Intervals</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/merge-intervals/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p6')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p6">
@@ -1327,6 +1357,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p7')">Best Time to Buy and Sell Stock</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p7')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p7">
@@ -1374,6 +1405,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p8')">Two Sum II (Sorted Input)</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p8')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p8">
@@ -1417,6 +1449,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p9')">Container With Most Water</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/container-with-most-water/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p9')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p9">
@@ -1460,6 +1493,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p10')">Move Zeroes</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/move-zeroes/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p10')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p10">
@@ -1503,6 +1537,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p11')">3Sum</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/3sum/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p11')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p11">
@@ -1547,6 +1582,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p12')">Smallest Difference (AlgoExpert)</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/minimum-absolute-difference/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p12')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p12">
@@ -1593,6 +1629,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p13')">Longest Substring Without Repeating Characters</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/longest-substring-without-repeating-characters/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p13')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p13">
@@ -1636,6 +1673,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p14')">Longest Repeating Character Replacement</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/longest-repeating-character-replacement/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p14')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p14">
@@ -1680,6 +1718,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p15')">Minimum Size Subarray Sum</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/minimum-size-subarray-sum/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p15')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p15">
@@ -1724,6 +1763,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p16')">Maximum Average Subarray I</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/maximum-average-subarray-i/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p16')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p16">
@@ -1770,6 +1810,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p17')">Valid Anagram</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/valid-anagram/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p17')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p17">
@@ -1814,6 +1855,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p18')">Group Anagrams</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/group-anagrams/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p18')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p18">
@@ -1857,6 +1899,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p19')">Valid Palindrome</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/valid-palindrome/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p19')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p19">
@@ -1900,6 +1943,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p20')">String Compression</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/string-compression/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p20')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p20">
@@ -1944,6 +1988,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p21')">Encode and Decode Strings</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/encode-and-decode-strings/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p21')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p21">
@@ -1990,6 +2035,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p22')">Reverse Linked List</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/reverse-linked-list/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p22')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p22">
@@ -2034,6 +2080,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p23')">Linked List Cycle</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/linked-list-cycle/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p23')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p23">
@@ -2078,6 +2125,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p24')">Remove Nth Node From End</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/remove-nth-node-from-end-of-list/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p24')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p24">
@@ -2122,6 +2170,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p25')">Middle of the Linked List</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/middle-of-the-linked-list/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p25')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p25">
@@ -2165,6 +2214,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p26')">Kth Node From End</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/kth-node-from-end-of-linked-list/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p26')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p26">
@@ -2211,6 +2261,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p27')">Climbing Stairs</span>
     <span class="diff-badge diff-easy">Easy</span>
+    <a class="lc-link" href="https://leetcode.com/problems/climbing-stairs/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p27')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p27">
@@ -2254,6 +2305,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p28')">House Robber</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/house-robber/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p28')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p28">
@@ -2298,6 +2350,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p29')">Coin Change II (Count Ways)</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/coin-change-ii/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p29')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p29">
@@ -2342,6 +2395,7 @@ margin-right: 0.4rem;
     </div>
     <span class="prob-name" onclick="toggleNotes('p30')">Coin Change (Minimum Coins)</span>
     <span class="diff-badge diff-med">Medium</span>
+    <a class="lc-link" href="https://leetcode.com/problems/coin-change/" target="_blank" rel="noopener" title="Open on LeetCode" onclick="event.stopPropagation()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4"/><path d="M14 2l-7 7"/><path d="M13 9v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4"/></svg></a>
     <button class="expand-btn" onclick="toggleNotes('p30')">▾ notes</button>
   </div>
   <div class="prob-notes" id="notes-p30">
