@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon SysDev L4 — Interview Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2eb;
+  --paper: #faf8f3;
+  --ink: #1a1612;
+  --ink-light: #4a4540;
+  --ink-muted: #8a857e;
+  --rule: #ddd9d0;
+  --rule-dark: #c8c4bb;
+  --red: #c0392b;
+  --red-light: #fdf0ee;
+  --red-mid: #f5c6c0;
+  --green: #1e6b3c;
+  --green-light: #edf7f1;
+  --green-mid: #b8e0c8;
+  --amber: #9a5c00;
+  --amber-light: #fef8ec;
+  --amber-mid: #f5dfa0;
+  --blue: #1a3a6b;
+  --blue-light: #edf2fb;
+  --blue-mid: #b8ccf0;
+  --purple: #4a1a7a;
+  --purple-light: #f5eefb;
+  --stamp-red: #b83028;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(--bg);
+color: var(--ink);
+font-family: 'Syne', sans-serif;
+font-weight: 400;
+line-height: 1.6;
+min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.masthead {
+background: var(--ink);
+color: var(--paper);
+padding: 2.5rem 2rem 2rem;
+position: relative;
+overflow: hidden;
+}
+
+.masthead::before {
+content: '';
+position: absolute;
+top: 0; right: 0; bottom: 0;
+width: 40%;
+pointer-events: none;
+background: repeating-linear-gradient(
+45deg,
+transparent,
+transparent 3px,
+rgba(255,255,255,0.015) 3px,
+rgba(255,255,255,0.015) 6px
+);
+}
+
+.masthead-inner {
+max-width: 1080px;
+margin: 0 auto;
+display: flex;
+align-items: flex-end;
+justify-content: space-between;
+gap: 2rem;
+flex-wrap: wrap;
+position: relative;
+z-index: 1;
+}
+
+.masthead h1 {
+font-size: 1.6rem;
+font-weight: 800;
+letter-spacing: -0.02em;
+line-height: 1.2;
+}
+
+.masthead h1 span {
+color: #f0c060;
+}
+
+.masthead-sub {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.72rem;
+color: rgba(255,255,255,0.45);
+margin-top: 0.4rem;
+letter-spacing: 0.08em;
+}
+
+.tab-nav {
+display: flex;
+gap: 0.4rem;
+}
+
+.tab-btn {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.7rem;
+font-weight: 600;
+padding: 0.5rem 1rem;
+border: 1px solid rgba(255,255,255,0.2);
+background: transparent;
+color: rgba(255,255,255,0.5);
+cursor: pointer;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+transition: all 0.15s;
+border-radius: 2px;
+}
+
+.tab-btn:hover {
+background: rgba(255,255,255,0.07);
+color: rgba(255,255,255,0.8);
+}
+
+.tab-btn.active {
+background: #f0c060;
+border-color: #f0c060;
+color: var(--ink);
+}
+
+/* ── MAIN LAYOUT ── */
+.wrap {
+max-width: 1080px;
+margin: 0 auto;
+padding: 2.5rem 1.5rem 6rem;
+}
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ═══════════════════════════════════
+TRAPS SECTION
+═══════════════════════════════════ */
+
+.traps-header {
+margin-bottom: 2rem;
+padding-bottom: 1rem;
+border-bottom: 2px solid var(--ink);
+display: flex;
+align-items: baseline;
+gap: 1rem;
+}
+
+.traps-header h2 {
+font-size: 1.25rem;
+font-weight: 800;
+letter-spacing: -0.01em;
+}
+
+.traps-header .count {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.7rem;
+color: var(--ink-muted);
+}
+
+.trap-card {
+background: var(--paper);
+border: 1px solid var(--rule-dark);
+border-radius: 4px;
+margin-bottom: 1.5rem;
+overflow: hidden;
+box-shadow: 2px 2px 0 var(--rule-dark);
+}
+
+.trap-card-top {
+display: flex;
+align-items: stretch;
+border-bottom: 1px solid var(--rule-dark);
+}
+
+.trap-stamp {
+background: var(--stamp-red);
+color: white;
+writing-mode: vertical-rl;
+text-orientation: mixed;
+transform: rotate(180deg);
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.6rem;
+font-weight: 700;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+padding: 0.8rem 0.6rem;
+display: flex;
+align-items: center;
+justify-content: center;
+min-width: 32px;
+}
+
+.trap-title-area {
+padding: 1.1rem 1.25rem;
+flex: 1;
+}
+
+.trap-num {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.6rem;
+color: var(--ink-muted);
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-bottom: 0.3rem;
+}
+
+.trap-title {
+font-size: 1.05rem;
+font-weight: 800;
+letter-spacing: -0.01em;
+color: var(--ink);
+}
+
+.trap-body {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 0;
+}
+
+.trap-col {
+padding: 1.25rem 1.5rem;
+}
+
+.trap-col:first-child {
+background: var(--red-light);
+border-right: 1px solid var(--red-mid);
+}
+
+.trap-col:last-child {
+background: var(--green-light);
+}
+
+.trap-col-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.6rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+margin-bottom: 0.75rem;
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+
+.trap-col:first-child .trap-col-label { color: var(--red); }
+.trap-col:last-child .trap-col-label { color: var(--green); }
+
+.trap-col-label::before {
+content: '';
+display: inline-block;
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+
+.trap-col:first-child .trap-col-label::before { background: var(--red); }
+.trap-col:last-child .trap-col-label::before { background: var(--green); }
+
+.trap-col p {
+font-size: 0.87rem;
+color: var(--ink-light);
+line-height: 1.7;
+}
+
+.trap-col code {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.78em;
+background: rgba(0,0,0,0.07);
+padding: 0.1em 0.35em;
+border-radius: 2px;
+color: var(--ink);
+}
+
+.trap-phrase {
+display: inline-block;
+background: var(--green-mid);
+border: 1px solid var(--green);
+color: var(--green);
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.75rem;
+font-weight: 600;
+padding: 0.3rem 0.7rem;
+border-radius: 2px;
+margin-top: 0.75rem;
+}
+
+.trap-avoid-phrase {
+display: inline-block;
+background: var(--red-mid);
+border: 1px solid var(--red);
+color: var(--red);
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.75rem;
+font-weight: 600;
+padding: 0.3rem 0.7rem;
+border-radius: 2px;
+margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+.trap-body { grid-template-columns: 1fr; }
+.trap-col:first-child { border-right: none; border-bottom: 1px solid var(--red-mid); }
+}
+
+/* ═══════════════════════════════════
+CODING TRACKER
+═══════════════════════════════════ */
+
+.tracker-toolbar {
+display: flex;
+align-items: center;
+gap: 1rem;
+margin-bottom: 2rem;
+flex-wrap: wrap;
+}
+
+.tracker-toolbar h2 {
+font-size: 1.25rem;
+font-weight: 800;
+flex: 1;
+}
+
+.progress-bar-wrap {
+flex: 1;
+min-width: 160px;
+}
+
+.progress-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.65rem;
+color: var(--ink-muted);
+margin-bottom: 0.3rem;
+display: flex;
+justify-content: space-between;
+}
+
+.progress-bar {
+height: 6px;
+background: var(--rule-dark);
+border-radius: 3px;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, var(--green), #2ecc71);
+border-radius: 3px;
+transition: width 0.4s ease;
+}
+
+/* Group headers */
+.group-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.65rem;
+font-weight: 700;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(--ink-muted);
+padding: 0.5rem 0 0.5rem;
+margin: 1.75rem 0 0.6rem;
+border-bottom: 1px solid var(--rule);
+display: flex;
+align-items: center;
+gap: 0.75rem;
+}
+
+.group-label span {
+background: var(--ink);
+color: var(--paper);
+padding: 0.1rem 0.5rem;
+border-radius: 2px;
+font-size: 0.6rem;
+}
+
+/* Problem rows */
+.prob-row {
+background: var(--paper);
+border: 1px solid var(--rule-dark);
+border-radius: 3px;
+margin-bottom: 0.5rem;
+overflow: hidden;
+transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.prob-row:hover {
+border-color: var(--ink);
+box-shadow: 1px 1px 0 var(--rule-dark);
+}
+
+.prob-row.done {
+background: var(--green-light);
+border-color: var(--green-mid);
+}
+
+.prob-header {
+display: flex;
+align-items: center;
+gap: 0.75rem;
+padding: 0.8rem 1rem;
+cursor: pointer;
+}
+
+.prob-num {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.65rem;
+font-weight: 700;
+color: var(--ink-muted);
+min-width: 24px;
+}
+
+.prob-check {
+width: 18px;
+height: 18px;
+border: 2px solid var(--rule-dark);
+border-radius: 3px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+transition: all 0.15s;
+background: white;
+}
+
+.prob-check:hover { border-color: var(--green); }
+.prob-row.done .prob-check {
+background: var(--green);
+border-color: var(--green);
+color: white;
+}
+
+.prob-check svg {
+display: none;
+width: 10px;
+height: 10px;
+}
+
+.prob-row.done .prob-check svg { display: block; }
+
+.prob-name {
+font-weight: 600;
+font-size: 0.9rem;
+flex: 1;
+color: var(--ink);
+}
+
+.prob-row.done .prob-name {
+color: var(--green);
+text-decoration: line-through;
+text-decoration-color: var(--green-mid);
+}
+
+.diff-badge {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.6rem;
+font-weight: 700;
+padding: 0.15rem 0.55rem;
+border-radius: 2px;
+letter-spacing: 0.06em;
+}
+
+.diff-easy { background: var(--green-light); color: var(--green); border: 1px solid var(--green-mid); }
+.diff-med  { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-mid); }
+.diff-hard { background: var(--red-light);  color: var(--red);   border: 1px solid var(--red-mid); }
+
+.expand-btn {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.65rem;
+color: var(--ink-muted);
+background: none;
+border: none;
+cursor: pointer;
+padding: 0.2rem 0.4rem;
+border-radius: 2px;
+transition: all 0.15s;
+}
+
+.expand-btn:hover {
+background: var(--rule);
+color: var(--ink);
+}
+
+/* Problem notes panel */
+.prob-notes {
+display: none;
+border-top: 1px solid var(--rule);
+background: #f9f7f2;
+}
+
+.prob-notes.open { display: block; }
+
+.notes-grid {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 0;
+}
+
+.notes-cell {
+padding: 1rem 1.25rem;
+border-right: 1px solid var(--rule);
+font-size: 0.82rem;
+}
+
+.notes-cell:last-child { border-right: none; }
+
+.notes-cell-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.58rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(--ink-muted);
+margin-bottom: 0.5rem;
+}
+
+.notes-cell p {
+color: var(--ink-light);
+line-height: 1.65;
+font-size: 0.82rem;
+}
+
+.notes-cell code {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.78em;
+background: var(--rule);
+padding: 0.1em 0.35em;
+border-radius: 2px;
+color: var(--ink);
+}
+
+.pattern-tag {
+display: inline-block;
+background: var(--blue-light);
+color: var(--blue);
+border: 1px solid var(--blue-mid);
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.6rem;
+font-weight: 700;
+padding: 0.15rem 0.5rem;
+border-radius: 2px;
+margin-right: 0.3rem;
+margin-top: 0.3rem;
+letter-spacing: 0.04em;
+}
+
+.pattern-tag.orange {
+background: var(--amber-light);
+color: var(--amber);
+border-color: var(--amber-mid);
+}
+
+.pattern-tag.purple {
+background: var(--purple-light);
+color: var(--purple);
+border-color: #c8a0e8;
+}
+
+.complexity-row {
+display: flex;
+gap: 0.75rem;
+margin-top: 0.5rem;
+}
+
+.complexity-pill {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.65rem;
+font-weight: 600;
+padding: 0.2rem 0.6rem;
+background: var(--ink);
+color: var(--paper);
+border-radius: 2px;
+}
+
+@media (max-width: 700px) {
+.notes-grid { grid-template-columns: 1fr; }
+.notes-cell { border-right: none; border-bottom: 1px solid var(--rule); }
+.notes-cell:last-child { border-bottom: none; }
+}
+
+/* Clarify / Edge Cases strip */
+.notes-extra {
+display: grid;
+grid-template-columns: 1fr 1fr;
+border-top: 1px solid var(--rule);
+background: var(--paper);
+}
+
+.extra-cell {
+padding: 0.9rem 1.25rem;
+font-size: 0.8rem;
+border-right: 1px solid var(--rule);
+}
+
+.extra-cell:last-child {
+border-right: none;
+background: var(--amber-light);
+}
+
+.extra-cell:first-child {
+background: var(--blue-light);
+}
+
+.extra-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.58rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+margin-bottom: 0.4rem;
+display: flex;
+align-items: center;
+gap: 0.45rem;
+}
+
+.extra-cell:first-child .extra-label { color: var(--blue); }
+.extra-cell:last-child  .extra-label { color: var(--amber); }
+
+.extra-label::before {
+content: '';
+display: inline-block;
+width: 6px;
+height: 6px;
+border-radius: 50%;
+}
+
+.extra-cell:first-child .extra-label::before { background: var(--blue); }
+.extra-cell:last-child  .extra-label::before { background: var(--amber); }
+
+.extra-cell p {
+color: var(--ink-light);
+line-height: 1.6;
+font-size: 0.8rem;
+}
+
+.extra-cell code {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.78em;
+background: rgba(0,0,0,0.06);
+padding: 0.08em 0.32em;
+border-radius: 2px;
+color: var(--ink);
+}
+
+@media (max-width: 700px) {
+.notes-extra { grid-template-columns: 1fr; }
+.extra-cell { border-right: none; border-bottom: 1px solid var(--rule); }
+.extra-cell:last-child { border-bottom: none; }
+}
+
+/* ── FOOTER STATS ── */
+.stats-strip {
+display: flex;
+gap: 0;
+background: var(--paper);
+border: 1px solid var(--rule-dark);
+border-radius: 4px;
+overflow: hidden;
+margin-top: 2rem;
+box-shadow: 2px 2px 0 var(--rule-dark);
+}
+
+.stat-box {
+flex: 1;
+padding: 1rem 1.25rem;
+border-right: 1px solid var(--rule-dark);
+text-align: center;
+}
+
+.stat-box:last-child { border-right: none; }
+
+.stat-val {
+font-family: 'JetBrains Mono', monospace;
+font-size: 1.5rem;
+font-weight: 800;
+color: var(--ink);
+line-height: 1;
+margin-bottom: 0.25rem;
+}
+
+.stat-val.green { color: var(--green); }
+.stat-val.amber { color: var(--amber); }
+.stat-val.red { color: var(--red); }
+
+.stat-lbl {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.6rem;
+color: var(--ink-muted);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+/* ── STREAK + DAILY PICK ── */
+.stat-val.streak { color: var(--amber); }
+.stat-val.streak.hot { color: var(--red); }
+
+.daily-pick {
+background: linear-gradient(135deg, var(--ink) 0%, #2a2520 100%);
+color: var(--paper);
+border-radius: 4px;
+padding: 1rem 1.25rem;
+margin-top: 1.25rem;
+display: flex;
+align-items: center;
+gap: 1rem;
+flex-wrap: wrap;
+box-shadow: 2px 2px 0 var(--rule-dark);
+}
+
+.daily-pick.empty {
+background: var(--green-light);
+color: var(--green);
+border: 1px solid var(--green-mid);
+box-shadow: none;
+}
+
+.daily-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.62rem;
+font-weight: 700;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: #f0c060;
+padding: 0.25rem 0.55rem;
+border: 1px solid #f0c060;
+border-radius: 2px;
+flex-shrink: 0;
+}
+
+.daily-pick.empty .daily-label {
+color: var(--green);
+border-color: var(--green);
+}
+
+.daily-name {
+font-weight: 700;
+font-size: 0.95rem;
+flex: 1;
+min-width: 140px;
+}
+
+.daily-meta {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.68rem;
+color: rgba(255,255,255,0.55);
+}
+
+.daily-pick.empty .daily-meta { color: var(--green); }
+
+.daily-btn {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.68rem;
+font-weight: 700;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+padding: 0.45rem 0.9rem;
+background: #f0c060;
+color: var(--ink);
+border: none;
+border-radius: 2px;
+cursor: pointer;
+transition: transform 0.1s, box-shadow 0.15s;
+}
+
+.daily-btn:hover {
+transform: translateY(-1px);
+box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+}
+
+.daily-btn:active { transform: translateY(0); }
+
+/* Per-group counter */
+.group-count {
+margin-left: auto;
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.68rem;
+font-weight: 700;
+color: var(--ink-muted);
+padding: 0.15rem 0.5rem;
+background: var(--rule);
+border-radius: 2px;
+}
+
+.group-count.done {
+background: var(--green);
+color: var(--paper);
+}
+
+/* Difficulty breakdown */
+.diff-strip {
+display: flex;
+gap: 0.5rem;
+margin-top: 0.75rem;
+flex-wrap: wrap;
+}
+
+.diff-stat {
+flex: 1;
+min-width: 90px;
+padding: 0.65rem 0.9rem;
+border: 1px solid var(--rule-dark);
+border-radius: 3px;
+background: var(--paper);
+display: flex;
+align-items: baseline;
+gap: 0.5rem;
+font-family: 'JetBrains Mono', monospace;
+}
+
+.diff-stat.easy  { border-color: var(--green-mid);  background: var(--green-light); }
+.diff-stat.med   { border-color: var(--amber-mid);  background: var(--amber-light); }
+.diff-stat.hard  { border-color: var(--red-mid);    background: var(--red-light); }
+
+.diff-stat-label {
+font-size: 0.6rem;
+font-weight: 700;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+}
+
+.diff-stat.easy .diff-stat-label { color: var(--green); }
+.diff-stat.med  .diff-stat-label { color: var(--amber); }
+.diff-stat.hard .diff-stat-label { color: var(--red); }
+
+.diff-stat-val {
+font-size: 0.95rem;
+font-weight: 800;
+margin-left: auto;
+color: var(--ink);
+}
+
+/* Milestone toast */
+.toast {
+position: fixed;
+bottom: 2rem;
+left: 50%;
+transform: translateX(-50%) translateY(150%);
+background: var(--ink);
+color: var(--paper);
+padding: 0.9rem 1.5rem;
+border-radius: 4px;
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.85rem;
+font-weight: 600;
+letter-spacing: 0.04em;
+box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+z-index: 100;
+transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+pointer-events: none;
+}
+
+.toast.show {
+transform: translateX(-50%) translateY(0);
+}
+
+.toast .toast-emoji {
+margin-right: 0.4rem;
+}
+</style>
+
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div>
+      <h1>Amazon SysDev <span>L4</span><br>Interview Notes</h1>
+      <p class="masthead-sub">TRAPS · CODING TRACKER · PATTERNS · COMPLEXITY</p>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('traps', this)">⚠ Traps</button>
+      <button class="tab-btn" onclick="switchTab('tracker', this)">{ } Coding</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══════════════ TRAPS VIEW ═══════════════ -->
+
+  <div id="view-traps" class="view active">
+    <div class="traps-header">
+      <h2>Interview Traps</h2>
+      <span class="count">4 critical failure patterns to internalize</span>
+    </div>
+
+<!-- TRAP 1 -->
+<div class="trap-card">
+  <div class="trap-card-top">
+    <div class="trap-stamp">Trap</div>
+    <div class="trap-title-area">
+      <div class="trap-num">01 / 04 · SCOPING</div>
+      <div class="trap-title">Jumping to Solution Without Clarifying</div>
+    </div>
+  </div>
+  <div class="trap-body">
+    <div class="trap-col">
+      <div class="trap-col-label">The Trap</div>
+      <p>Interviewer gives a vague system design or debugging scenario. Candidate immediately starts implementing/describing a solution. Interviewer gives a gentle nod. Candidate goes deep on the wrong assumption and fails.</p>
+      <div class="trap-avoid-phrase">Silent assumption = guaranteed failure</div>
+    </div>
+    <div class="trap-col">
+      <div class="trap-col-label">How to Avoid</div>
+      <p>Always spend 2–3 minutes asking: <strong>scale</strong> (req/sec, data size), <strong>SLA</strong> (latency requirements, availability target), <strong>existing infra</strong>, and what <em>"done"</em> looks like.</p>
+      <p style="margin-top:0.75rem">Amazon's <em>Customer Obsession</em> LP — clarifying scope IS that principle in action. Frame your questions as serving the customer.</p>
+      <div class="trap-phrase">Ask before you architect.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRAP 2 -->
+<div class="trap-card">
+  <div class="trap-card-top">
+    <div class="trap-stamp">Trap</div>
+    <div class="trap-title-area">
+      <div class="trap-num">02 / 04 · SYSTEM DESIGN</div>
+      <div class="trap-title">Not Thinking About Failure Modes</div>
+    </div>
+  </div>
+  <div class="trap-body">
+    <div class="trap-col">
+      <div class="trap-col-label">The Trap</div>
+      <p>Candidate designs a perfect happy-path system. Interviewer asks <em>"what happens if the cache goes down?"</em> or <em>"what if the queue backs up?"</em> Candidate has no answer. Instant red flag.</p>
+      <div class="trap-avoid-phrase">Happy path only = junior signal</div>
+    </div>
+    <div class="trap-col">
+      <div class="trap-col-label">How to Avoid</div>
+      <p>For every component you add, <strong>proactively</strong> say: <em>"and here's how this fails and what happens when it does."</em></p>
+      <p style="margin-top:0.75rem">Amazon loves engineers who think about failure first. Get in the habit of adding a failure column to every design decision you make.</p>
+      <div class="trap-phrase">"The failure mode here is X, and we handle it by Y."</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRAP 3 -->
+<div class="trap-card">
+  <div class="trap-card-top">
+    <div class="trap-stamp">Trap</div>
+    <div class="trap-title-area">
+      <div class="trap-num">03 / 04 · CODING</div>
+      <div class="trap-title">Coding Without Explaining Thought Process</div>
+    </div>
+  </div>
+  <div class="trap-body">
+    <div class="trap-col">
+      <div class="trap-col-label">The Trap</div>
+      <p>Candidate silently codes. Gets the right answer. Gets <strong>No Hire</strong>. Amazon evaluates communication as heavily as correctness — they need to know you can explain code to a team.</p>
+      <div class="trap-avoid-phrase">Correct + Silent = No Hire</div>
+    </div>
+    <div class="trap-col">
+      <div class="trap-col-label">How to Avoid</div>
+      <p>Narrate every step out loud:</p>
+      <p style="margin-top:0.6rem"><em>"I'm using a hashmap here because lookup is O(1)… I'm iterating left to right because… My time complexity is O(n) because…"</em></p>
+      <p style="margin-top:0.6rem">Practice this until it is <strong>reflexive</strong>. Silence is penalized explicitly in Amazon debriefs.</p>
+      <div class="trap-phrase">Talk through every single decision.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRAP 4 -->
+<div class="trap-card">
+  <div class="trap-card-top">
+    <div class="trap-stamp">Trap</div>
+    <div class="trap-title-area">
+      <div class="trap-num">04 / 04 · DEBUGGING</div>
+      <div class="trap-title">Vague Debugging Answers ("I'd check the logs")</div>
+    </div>
+  </div>
+  <div class="trap-body">
+    <div class="trap-col">
+      <div class="trap-col-label">The Trap</div>
+      <p><em>"What would you do first?"</em> → <em>"I'd check the logs."</em><br>Interviewer: <em>"What would you look for?"</em><br>Candidate: <em>"…errors?"</em></p>
+      <p style="margin-top:0.75rem">This answer kills technical credibility immediately. It signals zero operational depth.</p>
+      <div class="trap-avoid-phrase">"Check the logs" is not an answer.</div>
+    </div>
+    <div class="trap-col">
+      <div class="trap-col-label">How to Avoid</div>
+      <p>Always be <strong>specific</strong> — name the exact command and what you expect to find:</p>
+      <p style="margin-top:0.6rem"><em>"I'd run <code>journalctl -u servicename -n 100 --since '5 min ago'</code> and look for ERROR/WARN entries around the time the alert fired. I'd also check <code>dmesg</code> for kernel-level OOM or disk events."</em></p>
+      <div class="trap-phrase">Command + what you expect to find.</div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <!-- ═══════════════ TRACKER VIEW ═══════════════ -->
+
+  <div id="view-tracker" class="view">
+
+<div class="tracker-toolbar">
+  <h2>Coding Prep Tracker</h2>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>Readiness</span>
+      <span id="prog-text">0 / 0 pts</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-box">
+    <div class="stat-val green" id="s-done">0</div>
+    <div class="stat-lbl">Completed</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val amber" id="s-rem">30</div>
+    <div class="stat-lbl">Remaining</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val" id="s-pct">0%</div>
+    <div class="stat-lbl">Readiness</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-val streak" id="s-streak">0</div>
+    <div class="stat-lbl">Day Streak</div>
+  </div>
+</div>
+
+<!-- DAILY PICK -->
+<div class="daily-pick" id="daily-pick">
+  <span class="daily-label">Today's Pick</span>
+  <span class="daily-name" id="daily-name">—</span>
+  <span class="daily-meta" id="daily-meta"></span>
+  <button class="daily-btn" onclick="rerollDaily()">Reroll</button>
+</div>
+
+<!-- DIFFICULTY BREAKDOWN -->
+<div class="diff-strip">
+  <div class="diff-stat easy">
+    <span class="diff-stat-label">Easy</span>
+    <span class="diff-stat-val" id="d-easy">0 / 12</span>
+  </div>
+  <div class="diff-stat med">
+    <span class="diff-stat-label">Medium</span>
+    <span class="diff-stat-val" id="d-med">0 / 18</span>
+  </div>
+  <div class="diff-stat hard">
+    <span class="diff-stat-label">Hard</span>
+    <span class="diff-stat-val" id="d-hard">0 / 0</span>
+  </div>
+</div>
+
+<!-- GROUP A: ARRAYS & HASHING -->
+<div class="group-label" data-group="A" data-range="1-7"><span>A</span> Arrays & Hashing<span class="group-count" id="gc-A">0 / 7</span></div>
+
+<div class="prob-row" id="p1">
+  <div class="prob-header">
+    <span class="prob-num">01</span>
+    <div class="prob-check" onclick="toggleDone(event,'p1')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p1')">Two Sum</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p1')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p1">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Hashmap</span><span class="pattern-tag">One Pass</span>
+        <p style="margin-top:0.6rem">Store <code>val → index</code> as you go. At each element check if <code>target - num</code> exists in map.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Don't use two loops. Single pass: check complement BEFORE inserting current element.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Follow-up: What if multiple pairs? What if sorted input?</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Exactly one solution guaranteed? Can same index be reused? Sorted input? Return indices or values?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty or single-element array. Duplicates where <code>nums[i]+nums[i]==target</code> — check complement before inserting. Negative numbers and zero.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p2">
+  <div class="prob-header">
+    <span class="prob-num">02</span>
+    <div class="prob-check" onclick="toggleDone(event,'p2')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p2')">Contains Duplicate</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p2')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p2">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Hashset</span>
+        <p style="margin-top:0.6rem">Add each element to a set. If element already in set → return true immediately.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Simplest hashset problem. Early exit on first duplicate found. Don't build entire set first.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Sorting approach is O(n log n) time, O(1) space — know the tradeoff.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>What counts as duplicate — strict equality, case-insensitive? Return true/false or count of duplicates?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty array returns false. Single element returns false. Very large array — memory cost of hashset.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p3">
+  <div class="prob-header">
+    <span class="prob-num">03</span>
+    <div class="prob-check" onclick="toggleDone(event,'p3')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p3')">Product of Array Except Self</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p3')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p3">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Prefix Product</span><span class="pattern-tag">Suffix Product</span>
+        <p style="margin-top:0.6rem">Build prefix products left→right, then multiply by suffix products right→left in one pass.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>No division allowed. Use output array for prefix pass, then single variable for suffix. Avoids extra O(n) space.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)*</span>
+        </div>
+        <p style="margin-top:0.6rem">*Output array excluded from space. Follow-up: handle zeros in array.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Can the array contain zeros? Negatives? Is division allowed (often explicitly banned)? Output size equal to input?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Single zero vs multiple zeros — changes every output slot. Integer overflow on large products — confirm bounds. Length-1 array.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p4">
+  <div class="prob-header">
+    <span class="prob-num">04</span>
+    <div class="prob-check" onclick="toggleDone(event,'p4')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p4')">Top K Frequent Elements</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p4')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p4">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Bucket Sort</span><span class="pattern-tag">Heap</span>
+        <p style="margin-top:0.6rem">Optimal: bucket sort by frequency (array of size n+1). Heap approach is O(n log k).</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Bucket sort wins: frequencies range 1→n, so buckets[freq].append(num). Iterate buckets reverse to get top K.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Mention both approaches. Interviewer may ask for heap solution explicitly.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Is K guaranteed ≤ number of unique elements? Ties — any order acceptable? Output order matters?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>All elements same frequency (K results arbitrary). K equals array length. Empty array or K=0.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p5">
+  <div class="prob-header">
+    <span class="prob-num">05</span>
+    <div class="prob-check" onclick="toggleDone(event,'p5')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p5')">Subarray Sum Equals K</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p5')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p5">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Prefix Sum</span><span class="pattern-tag">Hashmap</span>
+        <p style="margin-top:0.6rem">Store prefix sum counts. At each step: <code>count += map[prefix - k]</code>. Initialize map with <code>{0: 1}</code>.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>If <code>prefix[j] - prefix[i] == k</code> then subarray <code>i..j</code> sums to k. The hashmap counts how many valid i's exist for each j.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Handles negatives. Sliding window does NOT work here because of negatives.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Can K be negative? Can array contain negatives or zeros? Count subarrays or just return whether one exists?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Subarrays of length 1 equal to K. Prefix sum of 0 must map to count 1 (seed <code>{0:1}</code>). Overflow on long arrays.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p6">
+  <div class="prob-header">
+    <span class="prob-num">06</span>
+    <div class="prob-check" onclick="toggleDone(event,'p6')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p6')">Merge Intervals</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p6')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p6">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sort</span><span class="pattern-tag">Greedy</span>
+        <p style="margin-top:0.6rem">Sort by start time. Iterate: if current start ≤ last end, merge (extend end). Else, add current interval.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Sort first — that's the prerequisite. Merge condition: <code>cur[0] &lt;= last[1]</code>. New end: <code>max(last[1], cur[1])</code>.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n log n)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Follow-up: Insert new interval into sorted merged list.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Are touching intervals <code>[1,2],[2,3]</code> considered overlapping? Input already sorted? In-place mutation allowed?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty input. Single interval. All intervals overlap into one. Intervals fully contained in another.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p7">
+  <div class="prob-header">
+    <span class="prob-num">07</span>
+    <div class="prob-check" onclick="toggleDone(event,'p7')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p7')">Best Time to Buy and Sell Stock</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p7')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p7">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sliding Window</span><span class="pattern-tag">Greedy</span>
+        <p style="margin-top:0.6rem">Track running minimum price. At each day: profit = price - min_price. Update max_profit.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>One pass. You must buy before selling. Never look back — just track the minimum seen so far.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">Follow-up: Multiple transactions allowed (LC 122) — greedy take every upswing.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>One transaction only? Can buy and sell same day? Return max profit or the buy/sell days?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Monotonically decreasing prices — profit is 0, not negative. Single-day array. Empty array.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- GROUP B: TWO POINTERS -->
+<div class="group-label" data-group="B" data-range="8-12"><span>B</span> Two Pointers<span class="group-count" id="gc-B">0 / 5</span></div>
+
+<div class="prob-row" id="p8">
+  <div class="prob-header">
+    <span class="prob-num">08</span>
+    <div class="prob-check" onclick="toggleDone(event,'p8')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p8')">Two Sum II (Sorted Input)</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p8')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p8">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Two Pointers</span>
+        <p style="margin-top:0.6rem">Left pointer at start, right at end. Sum too big → move right left. Sum too small → move left right.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Sorted array enables two-pointer. This is O(1) space because no hashmap needed. Classic sorted-array technique.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Indices 1-based or 0-based? Is solution unique? Same element usable twice? Array always sorted ascending?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Two pointers crossing means no answer. Duplicates in array. Negative target with negative numbers.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p9">
+  <div class="prob-header">
+    <span class="prob-num">09</span>
+    <div class="prob-check" onclick="toggleDone(event,'p9')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p9')">Container With Most Water</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p9')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p9">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Two Pointers</span><span class="pattern-tag">Greedy</span>
+        <p style="margin-top:0.6rem">Move the pointer on the shorter wall inward. Area = min(h[l], h[r]) × (r - l).</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Moving the taller pointer can only decrease area. Moving the shorter might increase it. Greedy choice is provably optimal.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Heights non-negative? Width is index difference or something else? One or many valid answers?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Array length < 2 → 0 area. All equal heights. Single tall spike surrounded by zeros.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p10">
+  <div class="prob-header">
+    <span class="prob-num">10</span>
+    <div class="prob-check" onclick="toggleDone(event,'p10')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p10')">Move Zeroes</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p10')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p10">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Two Pointers</span><span class="pattern-tag">In-Place</span>
+        <p style="margin-top:0.6rem">Slow pointer tracks next write position. Fast pointer finds non-zeros. Swap when non-zero found.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>In-place. Maintain relative order of non-zeros. Slow pointer always points to next slot for a non-zero element.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>In-place required? Preserve relative order of non-zero elements? Return array or void?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>All zeros. No zeros. Single element. Maintaining stability with two-pointer swap.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p11">
+  <div class="prob-header">
+    <span class="prob-num">11</span>
+    <div class="prob-check" onclick="toggleDone(event,'p11')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p11')">3Sum</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p11')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p11">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sort</span><span class="pattern-tag">Two Pointers</span>
+        <p style="margin-top:0.6rem">Sort array. Fix one element, then two-pointer on the rest. Skip duplicates at each level.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Skip duplicates for fixed element AND for both pointers after finding a valid triplet. Critical to avoid duplicate results.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n²)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Early exit: if nums[i] > 0, no triplet possible.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Distinct triplets only — how to dedupe? Sorted output required? Can values repeat in input?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Fewer than 3 elements. All zeros <code>[0,0,0]</code>. Multiple duplicates — skip equal neighbors after a match.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p12">
+  <div class="prob-header">
+    <span class="prob-num">12</span>
+    <div class="prob-check" onclick="toggleDone(event,'p12')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p12')">Smallest Difference (AlgoExpert)</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p12')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p12">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sort</span><span class="pattern-tag">Two Pointers</span>
+        <p style="margin-top:0.6rem">Sort both arrays. Two pointers, one per array. Move the pointer with the smaller value. Track minimum absolute difference.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Always advance the pointer on the smaller side — that's the only move that could reduce the difference. Track best pair seen.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n log n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Arrays can be different lengths? Return the pair or just the difference? Can arrays contain duplicates?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Either array empty. Arrays must be sorted first — state it. Equal elements → difference 0, return immediately.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- GROUP C: SLIDING WINDOW -->
+<div class="group-label" data-group="C" data-range="13-16"><span>C</span> Sliding Window<span class="group-count" id="gc-C">0 / 4</span></div>
+
+<div class="prob-row" id="p13">
+  <div class="prob-header">
+    <span class="prob-num">13</span>
+    <div class="prob-check" onclick="toggleDone(event,'p13')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p13')">Longest Substring Without Repeating Characters</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p13')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p13">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sliding Window</span><span class="pattern-tag">Hashmap</span>
+        <p style="margin-top:0.6rem">Map char → last seen index. Left pointer jumps to <code>max(left, map[char]+1)</code> on duplicate.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Don't just move left by 1 on collision — jump left to the character AFTER the previous occurrence. Use max() to prevent moving backwards.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(min(n,k))</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>What defines a character — ASCII, Unicode, case-sensitive? Return length or the substring itself?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty string → 0. All same character. All distinct. Left pointer must jump past last seen index, not reset.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p14">
+  <div class="prob-header">
+    <span class="prob-num">14</span>
+    <div class="prob-check" onclick="toggleDone(event,'p14')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p14')">Longest Repeating Character Replacement</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p14')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p14">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sliding Window</span><span class="pattern-tag">Freq Count</span>
+        <p style="margin-top:0.6rem">Window is valid if <code>windowLen - maxFreq &lt;= k</code>. Expand right, shrink left when invalid.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Track max frequency in window. Replacements needed = window size - max freq. Don't re-decrement maxFreq when shrinking (optimization trick).</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">One of the harder sliding window problems. Practice until invariant is second nature.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Alphabet size — uppercase only, full ASCII? K can be 0? K larger than string length?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty string. K ≥ length → return full length. Window shrinks only when <code>(windowLen - maxFreq) > k</code>.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p15">
+  <div class="prob-header">
+    <span class="prob-num">15</span>
+    <div class="prob-check" onclick="toggleDone(event,'p15')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p15')">Minimum Size Subarray Sum</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p15')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p15">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sliding Window</span><span class="pattern-tag">Variable Size</span>
+        <p style="margin-top:0.6rem">Expand right always. Shrink left while <code>sum &gt;= target</code>, updating min length at each shrink.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Variable-size window. Update minimum INSIDE the shrink loop (after each valid state). All values positive — that's what enables sliding window here.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">Return 0 if no valid subarray found.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>All positive numbers or can include zero/negatives? Return length or the subarray? If no valid subarray exists?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>No valid window → return 0. Sliding window only valid with non-negatives. Single element ≥ target.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p16">
+  <div class="prob-header">
+    <span class="prob-num">16</span>
+    <div class="prob-check" onclick="toggleDone(event,'p16')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p16')">Maximum Average Subarray I</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p16')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p16">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Sliding Window</span><span class="pattern-tag">Fixed Size</span>
+        <p style="margin-top:0.6rem">Fixed window of size k. Add incoming element, subtract outgoing element. Track max sum.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Fixed-size window — no left pointer movement logic needed. Just slide: <code>sum += nums[i] - nums[i-k]</code>. Simplest sliding window pattern.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>K guaranteed ≤ array length? Return integer or floating-point? Precision requirements?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>K equals array length → one window only. Negative numbers affect average. Integer overflow on large sums.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- GROUP D: STRINGS -->
+<div class="group-label" data-group="D" data-range="17-21"><span>D</span> Strings<span class="group-count" id="gc-D">0 / 5</span></div>
+
+<div class="prob-row" id="p17">
+  <div class="prob-header">
+    <span class="prob-num">17</span>
+    <div class="prob-check" onclick="toggleDone(event,'p17')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p17')">Valid Anagram</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p17')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p17">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Freq Count</span><span class="pattern-tag">Hashmap</span>
+        <p style="margin-top:0.6rem">Count chars in s, decrement for t. All counts must be zero. Or sort both strings and compare.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Single hashmap: increment for s, decrement for t. One pass through each. Check all values == 0.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">O(1) space — alphabet is fixed size 26.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Case-sensitive? ASCII only or Unicode? Whitespace matters? Same-length guaranteed?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Different lengths → false immediately. Empty strings → both empty is true. Unicode needs codepoint count not byte length.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p18">
+  <div class="prob-header">
+    <span class="prob-num">18</span>
+    <div class="prob-check" onclick="toggleDone(event,'p18')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p18')">Group Anagrams</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p18')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p18">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Hashmap</span><span class="pattern-tag">Canonical Key</span>
+        <p style="margin-top:0.6rem">Key = sorted string (or char count tuple). Group all strings with same key.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Canonical key trick: sort each word → use as hashmap key. O(n·k log k) where k = avg word length. Tuple of 26 counts is O(n·k) alternative.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(nk log k)</span>
+          <span class="complexity-pill">S: O(nk)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Lowercase only — can use 26-size array key? Group order matters? Return list of lists?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty input. Single string. All unique strings → each its own group. Empty string as input element.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p19">
+  <div class="prob-header">
+    <span class="prob-num">19</span>
+    <div class="prob-check" onclick="toggleDone(event,'p19')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p19')">Valid Palindrome</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p19')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p19">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Two Pointers</span><span class="pattern-tag">String</span>
+        <p style="margin-top:0.6rem">Left/right pointers. Skip non-alphanumeric. Compare lowercased chars. Move both inward.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Don't pre-clean the string. Skip on the fly using <code>isalnum()</code> check inside the while loop. Lowercase both sides before comparing.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Alphanumeric only (ignore punctuation and spaces)? Case-insensitive? Unicode considerations?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty string → true. Single character → true. All non-alphanumeric → true (nothing to compare).</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p20">
+  <div class="prob-header">
+    <span class="prob-num">20</span>
+    <div class="prob-check" onclick="toggleDone(event,'p20')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p20')">String Compression</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p20')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p20">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Two Pointers</span><span class="pattern-tag">In-Place</span>
+        <p style="margin-top:0.6rem">Write pointer (slow) + read pointer (fast). Count consecutive chars, write char then count digits in-place.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>In-place: write pointer always ≤ read pointer. Don't write count if it's 1. Write multi-digit counts digit by digit.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">Return write pointer position as new length.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>In-place with O(1) extra space? Count of 1 written as <code>a</code> not <code>a1</code>? Modify input or return new?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Single character (no compression). Count > 9 — multiple digits. Compressed longer than original — problem-specific spec.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p21">
+  <div class="prob-header">
+    <span class="prob-num">21</span>
+    <div class="prob-check" onclick="toggleDone(event,'p21')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p21')">Encode and Decode Strings</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p21')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p21">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Design</span><span class="pattern-tag">Length Prefix</span>
+        <p style="margin-top:0.6rem">Encode: prepend <code>len(s) + '#' + s</code> for each string. Decode: read length up to #, then read exactly that many chars.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Delimiter-based encoding breaks on strings that contain the delimiter. Length-prefix encoding is unambiguous regardless of content.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Strings can contain any character including the delimiter? Non-ASCII? Empty strings in list?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty list. List with empty strings. Use length-prefix like <code>5#hello</code> to avoid delimiter collision.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- GROUP E: LINKED LISTS -->
+<div class="group-label" data-group="E" data-range="22-26"><span>E</span> Linked Lists<span class="group-count" id="gc-E">0 / 5</span></div>
+
+<div class="prob-row" id="p22">
+  <div class="prob-header">
+    <span class="prob-num">22</span>
+    <div class="prob-check" onclick="toggleDone(event,'p22')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p22')">Reverse Linked List</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p22')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p22">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Linked List</span><span class="pattern-tag">Iterative</span>
+        <p style="margin-top:0.6rem">Three pointers: prev=None, curr=head. Each step: save next, point curr.next→prev, advance both.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Save <code>next = curr.next</code> BEFORE breaking the link. Return prev (not curr) at end — curr will be None.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">Know recursive version too. Interviewer often asks for both.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Iterative or recursive — any preference? Should the original list be mutated? Return new head?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty list (null head). Single node. Recursive solution — stack overflow on very long lists.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p23">
+  <div class="prob-header">
+    <span class="prob-num">23</span>
+    <div class="prob-check" onclick="toggleDone(event,'p23')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p23')">Linked List Cycle</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p23')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p23">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Fast & Slow Pointers</span>
+        <p style="margin-top:0.6rem">Floyd's algorithm. Slow moves 1, fast moves 2. If they meet → cycle exists.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>O(1) space solution. Don't use hashset. If fast reaches null → no cycle. Fast must check <code>fast and fast.next</code> before advancing.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">Follow-up: Find where the cycle begins (LC 142).</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Can the list be empty? Is modifying nodes allowed? Return boolean or the cycle start node?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty or single-node list without self-loop → false. Self-loop on one node → true. Fast pointer null-check both <code>fast</code> and <code>fast.next</code>.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p24">
+  <div class="prob-header">
+    <span class="prob-num">24</span>
+    <div class="prob-check" onclick="toggleDone(event,'p24')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p24')">Remove Nth Node From End</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p24')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p24">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Fast & Slow Pointers</span><span class="pattern-tag">Dummy Node</span>
+        <p style="margin-top:0.6rem">Advance fast n+1 steps ahead. Move both until fast is null. Slow is now at node before target. Use dummy head.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Dummy node before head handles edge case of removing head. Fast advances n+1 (not n) so slow stops at predecessor of target node.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">One pass. Always use dummy node for linked list deletion problems.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Is N guaranteed valid (1 ≤ N ≤ length)? Return new head? Can list be empty?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Removing the head (N == length) — use dummy node. Single-node list with N=1. Off-by-one on gap between pointers.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p25">
+  <div class="prob-header">
+    <span class="prob-num">25</span>
+    <div class="prob-check" onclick="toggleDone(event,'p25')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p25')">Middle of the Linked List</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p25')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p25">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Fast & Slow Pointers</span>
+        <p style="margin-top:0.6rem">Slow moves 1, fast moves 2. When fast reaches end, slow is at middle.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Even-length list: returns second middle (slow is ahead). For first middle, stop when <code>fast.next == null</code> instead of <code>fast == null</code>.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>If even length, return first or second middle? Return node or value? Can list be empty?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty list → null. Single node → itself. Even length — spec decides first vs second middle.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p26">
+  <div class="prob-header">
+    <span class="prob-num">26</span>
+    <div class="prob-check" onclick="toggleDone(event,'p26')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p26')">Kth Node From End</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p26')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p26">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">Fast & Slow Pointers</span>
+        <p style="margin-top:0.6rem">Advance fast k steps. Then move both until fast reaches end. Slow is at kth from end.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Same as Remove Nth From End without deletion. One pass. k-step gap between pointers maintained throughout traversal.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Is K guaranteed valid? 1-indexed from tail (K=1 is last node)? What if list is shorter than K?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>K equals list length → return head. K > length → usually null or error. Single-node list with K=1.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- GROUP F: DYNAMIC PROGRAMMING -->
+<div class="group-label" data-group="F" data-range="27-30"><span>F</span> Dynamic Programming<span class="group-count" id="gc-F">0 / 4</span></div>
+
+<div class="prob-row" id="p27">
+  <div class="prob-header">
+    <span class="prob-num">27</span>
+    <div class="prob-check" onclick="toggleDone(event,'p27')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p27')">Climbing Stairs</span>
+    <span class="diff-badge diff-easy">Easy</span>
+    <button class="expand-btn" onclick="toggleNotes('p27')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p27">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">DP</span><span class="pattern-tag">Fibonacci</span>
+        <p style="margin-top:0.6rem"><code>dp[i] = dp[i-1] + dp[i-2]</code>. Base cases: dp[1]=1, dp[2]=2. Optimize to O(1) space with two variables.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>This IS Fibonacci starting from 1,2. Space-optimize: only need previous two values. Introduce yourself to DP recurrence thinking here.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Can N be 0 or negative? Only 1 and 2 step options? Return count or actual paths?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>N=0 → 1 (empty path). N=1 → 1. Integer overflow for large N — may need long/BigInt.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p28">
+  <div class="prob-header">
+    <span class="prob-num">28</span>
+    <div class="prob-check" onclick="toggleDone(event,'p28')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p28')">House Robber</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p28')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p28">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">DP</span><span class="pattern-tag">1D</span>
+        <p style="margin-top:0.6rem"><code>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</code>. At each house: rob it (take i-2 + current) or skip it (take i-1).</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Two choices at each step, take the max. Optimize: only need rob1 and rob2 variables. Classic "can't take adjacent" DP.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n)</span>
+          <span class="complexity-pill">S: O(1)</span>
+        </div>
+        <p style="margin-top:0.6rem">Follow-up: House Robber II (circular, LC 213).</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Can the array be empty? All values non-negative? Circular (houses in a loop)?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Empty → 0. Single house → its value. Two houses → max of the two. Negative values not in standard spec.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p29">
+  <div class="prob-header">
+    <span class="prob-num">29</span>
+    <div class="prob-check" onclick="toggleDone(event,'p29')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p29')">Coin Change II (Count Ways)</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p29')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p29">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">DP</span><span class="pattern-tag">Unbounded Knapsack</span>
+        <p style="margin-top:0.6rem">Outer loop: coins. Inner loop: amounts. <code>dp[a] += dp[a - coin]</code>. Init: <code>dp[0] = 1</code>.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Loop coins in outer loop to avoid counting order permutations as different combinations. Inner loop: amount. This ordering is critical for combination count vs permutation count.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n·m)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">n = amount, m = coins. Classic unbounded knapsack variant.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Unlimited use of each coin? Count combinations (order doesn't matter) or permutations? Amount can be 0?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Amount=0 → 1 way (empty set). No valid combination → 0. Outer loop on coins, inner on amount — order prevents duplicate permutations.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="prob-row" id="p30">
+  <div class="prob-header">
+    <span class="prob-num">30</span>
+    <div class="prob-check" onclick="toggleDone(event,'p30')">
+      <svg viewBox="0 0 12 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 11,1"/></svg>
+    </div>
+    <span class="prob-name" onclick="toggleNotes('p30')">Coin Change (Minimum Coins)</span>
+    <span class="diff-badge diff-med">Medium</span>
+    <button class="expand-btn" onclick="toggleNotes('p30')">▾ notes</button>
+  </div>
+  <div class="prob-notes" id="notes-p30">
+    <div class="notes-grid">
+      <div class="notes-cell">
+        <div class="notes-cell-label">Pattern</div>
+        <span class="pattern-tag">DP</span><span class="pattern-tag">Bottom-Up</span>
+        <p style="margin-top:0.6rem">Init dp with infinity, dp[0]=0. For each amount, try each coin: <code>dp[a] = min(dp[a], dp[a-coin]+1)</code>.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Key Insight</div>
+        <p>Init with <code>float('inf')</code> not -1 (easier math). Return -1 only at the end if <code>dp[amount] == inf</code>. Coin loop can be inner or outer here — doesn't matter for min count.</p>
+      </div>
+      <div class="notes-cell">
+        <div class="notes-cell-label">Complexity</div>
+        <div class="complexity-row">
+          <span class="complexity-pill">T: O(n·m)</span>
+          <span class="complexity-pill">S: O(n)</span>
+        </div>
+        <p style="margin-top:0.6rem">Most common DP interview problem. Know it cold.</p>
+      </div>
+    </div>
+    <div class="notes-extra">
+      <div class="extra-cell">
+        <div class="extra-label">Clarify</div>
+        <p>Return -1 or something else if unreachable? Unlimited coin use? Amount non-negative?</p>
+      </div>
+      <div class="extra-cell">
+        <div class="extra-label">Edge Cases</div>
+        <p>Amount=0 → 0 coins. Unreachable amount — return -1. Initialize DP with <code>amount+1</code> as sentinel, not Infinity mismatch.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  </div><!-- end tracker view -->
+
+</div><!-- end wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(tab, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  const btn = el || (typeof event !== 'undefined' && event && event.target)
+    || document.querySelector('.tab-btn[onclick*="' + tab + '"]');
+  if (btn) btn.classList.add('active');
+}
+
+// ── TOGGLE DONE ──
+function toggleDone(e, id) {
+  e.stopPropagation();
+  const row = document.getElementById(id);
+  const wasDone = row.classList.contains('done');
+  row.classList.toggle('done');
+  const nowDone = row.classList.contains('done');
+  updateStats();
+  updateGroups();
+  updateDifficulty();
+  updateDailyPick();
+  saveState();
+  if (nowDone && !wasDone) {
+    markActivity();
+    // Recompute weighted readiness for milestones
+    let totalW = 0, doneW = 0;
+    document.querySelectorAll('.prob-row').forEach(r => {
+      const w = getWeight(r);
+      totalW += w;
+      if (r.classList.contains('done')) doneW += w;
+    });
+    const pct = totalW === 0 ? 0 : Math.round(doneW / totalW * 100);
+    const prev = parseInt(localStorage.getItem('sysdev-last-milestone') || '0', 10);
+    const crossed = [25, 50, 75, 100].find(m => pct >= m && prev < m);
+    if (crossed) {
+      localStorage.setItem('sysdev-last-milestone', String(crossed));
+      const msgs = {
+         25: ['🎯', '25% ready — warming up'],
+         50: ['⚡', 'Halfway to loop-ready'],
+         75: ['🚀', '75% — interview shape'],
+        100: ['🏆', 'Fully prepped. Go get that L4']
+      };
+      showToast(msgs[crossed][0], msgs[crossed][1]);
+    } else if (document.querySelectorAll('.prob-row.done').length === 1) {
+      showToast('✨', 'First one down');
+    }
+  }
+}
+
+// ── TOGGLE NOTES ──
+function toggleNotes(id) {
+  const notes = document.getElementById('notes-' + id);
+  if (!notes) return;
+  const isOpen = notes.classList.contains('open');
+  notes.classList.toggle('open', !isOpen);
+  const btn = document.querySelector('#' + id + ' .expand-btn');
+  if (btn) btn.textContent = isOpen ? '▾ notes' : '▴ notes';
+}
+
+// ── STATS ──
+const WEIGHTS = { easy: 1, med: 2, hard: 3 };
+
+function getWeight(row) {
+  const badge = row.querySelector('.diff-badge');
+  if (!badge) return 1;
+  if (badge.classList.contains('diff-easy')) return WEIGHTS.easy;
+  if (badge.classList.contains('diff-med'))  return WEIGHTS.med;
+  if (badge.classList.contains('diff-hard')) return WEIGHTS.hard;
+  return 1;
+}
+
+function updateStats() {
+  let totalCount = 0, doneCount = 0;
+  let totalWeight = 0, doneWeight = 0;
+  document.querySelectorAll('.prob-row').forEach(row => {
+    const w = getWeight(row);
+    totalCount++;
+    totalWeight += w;
+    if (row.classList.contains('done')) {
+      doneCount++;
+      doneWeight += w;
+    }
+  });
+  const rem = totalCount - doneCount;
+  const pct = totalWeight === 0 ? 0 : Math.round(doneWeight / totalWeight * 100);
+
+  document.getElementById('s-done').textContent = doneCount;
+  document.getElementById('s-rem').textContent = rem;
+  document.getElementById('s-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = doneWeight + ' / ' + totalWeight + ' pts';
+}
+
+// ── LOCALSTORAGE PERSISTENCE ──
+function saveState() {
+  const done = [];
+  document.querySelectorAll('.prob-row.done').forEach(r => done.push(r.id));
+  try { localStorage.setItem('sysdev-done', JSON.stringify(done)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('sysdev-done') || '[]');
+    saved.forEach(id => {
+      const row = document.getElementById(id);
+      if (row) row.classList.add('done');
+    });
+    updateStats();
+    updateGroups();
+    updateDifficulty();
+    updateStreak();
+    updateDailyPick();
+  } catch(e) {}
+}
+
+// ── GROUP COUNTERS ──
+const GROUPS = {
+  A: [1, 7], B: [8, 12], C: [13, 16],
+  D: [17, 21], E: [22, 26], F: [27, 30]
+};
+
+function updateGroups() {
+  Object.keys(GROUPS).forEach(letter => {
+    const [lo, hi] = GROUPS[letter];
+    let done = 0;
+    const total = hi - lo + 1;
+    for (let i = lo; i <= hi; i++) {
+      const row = document.getElementById('p' + i);
+      if (row && row.classList.contains('done')) done++;
+    }
+    const el = document.getElementById('gc-' + letter);
+    if (el) {
+      el.textContent = done + ' / ' + total;
+      el.classList.toggle('done', done === total);
+    }
+  });
+}
+
+// ── DIFFICULTY BREAKDOWN ──
+function updateDifficulty() {
+  const buckets = { easy: [0, 0], med: [0, 0], hard: [0, 0] };
+  document.querySelectorAll('.prob-row').forEach(row => {
+    const badge = row.querySelector('.diff-badge');
+    if (!badge) return;
+    let key = null;
+    if (badge.classList.contains('diff-easy')) key = 'easy';
+    else if (badge.classList.contains('diff-med')) key = 'med';
+    else if (badge.classList.contains('diff-hard')) key = 'hard';
+    if (!key) return;
+    buckets[key][1]++;
+    if (row.classList.contains('done')) buckets[key][0]++;
+  });
+  Object.keys(buckets).forEach(k => {
+    const [done, total] = buckets[k];
+    const el = document.getElementById('d-' + k);
+    if (el) el.textContent = done + ' / ' + total;
+    // hide difficulty cards with zero total
+    const card = el ? el.closest('.diff-stat') : null;
+    if (card) card.style.display = total === 0 ? 'none' : '';
+  });
+}
+
+// ── DAILY PICK ──
+function pickUnsolved() {
+  const remaining = [];
+  for (let i = 1; i <= 30; i++) {
+    const row = document.getElementById('p' + i);
+    if (row && !row.classList.contains('done')) remaining.push(i);
+  }
+  if (remaining.length === 0) return null;
+  // Deterministic per-day pick unless user rerolls
+  const today = new Date().toISOString().slice(0, 10);
+  const stored = JSON.parse(localStorage.getItem('sysdev-daily') || '{}');
+  if (stored.date === today && remaining.includes(stored.pick)) {
+    return stored.pick;
+  }
+  const pick = remaining[Math.floor(Math.random() * remaining.length)];
+  localStorage.setItem('sysdev-daily', JSON.stringify({ date: today, pick }));
+  return pick;
+}
+
+function updateDailyPick() {
+  const pick = pickUnsolved();
+  const card = document.getElementById('daily-pick');
+  const nameEl = document.getElementById('daily-name');
+  const metaEl = document.getElementById('daily-meta');
+  if (pick === null) {
+    card.classList.add('empty');
+    nameEl.textContent = 'All 30 cleared. Rest day or revisit stale ones.';
+    metaEl.textContent = '';
+    return;
+  }
+  card.classList.remove('empty');
+  const row = document.getElementById('p' + pick);
+  const name = row.querySelector('.prob-name').textContent;
+  const diff = row.querySelector('.diff-badge').textContent;
+  nameEl.textContent = name;
+  metaEl.textContent = '#' + String(pick).padStart(2, '0') + ' · ' + diff;
+  card.onclick = function(e) {
+    if (e.target.classList.contains('daily-btn')) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const notes = document.getElementById('notes-p' + pick);
+    if (notes && !notes.classList.contains('open')) toggleNotes('p' + pick);
+  };
+}
+
+function rerollDaily() {
+  const remaining = [];
+  for (let i = 1; i <= 30; i++) {
+    const row = document.getElementById('p' + i);
+    if (row && !row.classList.contains('done')) remaining.push(i);
+  }
+  if (remaining.length === 0) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const pick = remaining[Math.floor(Math.random() * remaining.length)];
+  localStorage.setItem('sysdev-daily', JSON.stringify({ date: today, pick }));
+  updateDailyPick();
+}
+
+// ── STREAK ──
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function daysBetween(a, b) {
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+
+function markActivity() {
+  const today = todayStr();
+  const data = JSON.parse(localStorage.getItem('sysdev-streak') || '{}');
+  if (data.last === today) return; // already counted
+  if (data.last && daysBetween(data.last, today) === 1) {
+    data.streak = (data.streak || 0) + 1;
+  } else {
+    data.streak = 1;
+  }
+  data.last = today;
+  localStorage.setItem('sysdev-streak', JSON.stringify(data));
+  updateStreak();
+}
+
+function updateStreak() {
+  const data = JSON.parse(localStorage.getItem('sysdev-streak') || '{}');
+  const today = todayStr();
+  let streak = data.streak || 0;
+  // If last activity wasn't today or yesterday, streak is effectively 0 until next tick
+  if (data.last && daysBetween(data.last, today) > 1) streak = 0;
+  const el = document.getElementById('s-streak');
+  if (el) {
+    el.textContent = streak;
+    el.classList.toggle('hot', streak >= 5);
+  }
+}
+
+// ── TOAST ──
+let toastTimer = null;
+function showToast(emoji, msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.innerHTML = '<span class="toast-emoji">' + emoji + '</span>' + msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+loadState();
+</script>
+
+</body>
+</html>
