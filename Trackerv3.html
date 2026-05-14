@@ -1,0 +1,2537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Amazon SDE 60-Day Tracker</title>
+<style>
+  :root {
+    --bg: #07090d;
+    --bg-2: #0d1117;
+    --panel: #141923;
+    --panel-2: #1c2230;
+    --line: #262d3d;
+    --fg: #e7eaf0;
+    --muted: #8a93a3;
+    --accent: #ff9900;
+    --accent-2: #146eb4;
+    --accent-3: #c084fc;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --hard: #f87171;
+    --easy: #60a5fa;
+    --med: #fbbf24;
+    --grad-1: linear-gradient(135deg, #ff9900 0%, #ff5e62 100%);
+    --grad-2: linear-gradient(135deg, #146eb4 0%, #c084fc 100%);
+    --grad-3: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+  }
+  [data-theme="light"] {
+    --bg: #f7f8fb;
+    --bg-2: #eef1f6;
+    --panel: #ffffff;
+    --panel-2: #f1f4f9;
+    --line: #e4e7ed;
+    --fg: #1a1f2c;
+    --muted: #6b7280;
+    --accent: #d97706;
+    --accent-2: #1d4ed8;
+    --accent-3: #7c3aed;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --hard: #dc2626;
+    --easy: #2563eb;
+    --med: #d97706;
+  }
+  [data-theme="hc"] {
+    /* high-contrast: pure black/white + vivid accents */
+    --bg: #000000;
+    --bg-2: #0a0a0a;
+    --panel: #111111;
+    --panel-2: #1a1a1a;
+    --line: #ffffff;
+    --fg: #ffffff;
+    --muted: #cfcfcf;
+    --accent: #ffd000;
+    --accent-2: #00d4ff;
+    --accent-3: #ff66cc;
+    --ok: #00ff99;
+    --warn: #ffd000;
+    --hard: #ff5050;
+    --easy: #00d4ff;
+    --med: #ffd000;
+  }
+  [data-theme="hc"] .progress-fill { box-shadow: 0 0 0 1px #fff; }
+  [data-theme="hc"] *:focus-visible { outline: 3px solid #ffd000 !important; outline-offset: 2px !important; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  /* ───── windows scrollbar polish ───── */
+  * { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; border: 2px solid var(--bg); }
+  *::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  body::before {
+    content:""; position: fixed; inset:0; pointer-events:none; z-index:-1;
+    background:
+      radial-gradient(900px 600px at 0% 0%, rgba(255,153,0,.10), transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, rgba(20,110,180,.10), transparent 60%),
+      radial-gradient(700px 500px at 50% 100%, rgba(192,132,252,.08), transparent 60%);
+  }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { text-decoration: underline; color: var(--accent); }
+
+  /* ───── header ───── */
+  header { position: sticky; top: 0; z-index: 10; background: rgba(20,25,35,.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: 14px 20px; }
+  /* gradient-text title with safe fallback to accent color */
+  header h1 { margin: 0; font-size: 19px; color: var(--accent); font-weight: 800; letter-spacing: -.01em; }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    header h1 { background: var(--grad-1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  }
+  [data-theme="light"] header { background: rgba(255,255,255,.92); }
+  [data-theme="hc"] header { background: #000; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  header .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* ───── progress + xp ───── */
+  .progress { flex: 1; min-width: 260px; }
+  .progress-bar { height: 10px; background: var(--panel-2); border-radius: 99px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); }
+  .progress-fill { height: 100%; background: var(--grad-1); transition: width .6s cubic-bezier(.22,1,.36,1); position: relative; box-shadow: 0 0 18px rgba(255,153,0,.5); }
+  .progress-fill::after {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+    animation: shimmer 2.4s linear infinite;
+  }
+  @keyframes shimmer { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+  .stats { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; align-items: center; }
+  .stats .pill { background: var(--panel-2); border: 1px solid var(--line); padding: 3px 9px; border-radius: 99px; }
+  .stats .pill b { color: var(--fg); }
+  .stats .streak { background: linear-gradient(135deg, rgba(255,153,0,.18), rgba(255,94,98,.18)); border-color: rgba(255,153,0,.4); color: var(--accent); font-weight: 700; }
+  .stats .level { background: linear-gradient(135deg, rgba(192,132,252,.18), rgba(20,110,180,.18)); border-color: rgba(192,132,252,.4); color: var(--accent-3); font-weight: 700; }
+
+  nav.weeks { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  nav.weeks button { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); padding: 6px 12px; border-radius: 99px; cursor: pointer; font-size: 12px; transition: all .2s; }
+  nav.weeks button.active { background: var(--grad-1); color: #000; border-color: transparent; font-weight: 700; box-shadow: 0 4px 12px rgba(255,153,0,.4); }
+  nav.weeks button:hover:not(.active) { border-color: var(--accent); transform: translateY(-1px); }
+
+  .tabs { display: flex; gap: 4px; margin-left: auto; }
+  .tabs button { background: transparent; border: 1px solid var(--line); color: var(--muted); padding: 6px 14px; border-radius: 99px; cursor: pointer; font-size: 12px; transition: all .2s; }
+  .tabs button.active { color: var(--accent); border-color: var(--accent); background: rgba(255,153,0,.08); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+  /* ───── 60-day heatmap grid ───── */
+  .grid-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  .grid-wrap h3 { margin: 0 0 10px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .grid-60 { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
+  @media (max-width: 700px) { .grid-60 { grid-template-columns: repeat(10, 1fr); } }
+  .cell { aspect-ratio: 1/1; min-height: 22px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; display:flex; align-items:center; justify-content:center; font-size: 9px; color: var(--muted); cursor: pointer; transition: all .2s; position: relative; }
+  .cell:hover { transform: scale(1.18); border-color: var(--accent); z-index: 2; }
+  .cell.p25 { background: rgba(255,153,0,.18); border-color: rgba(255,153,0,.35); color: #fff; }
+  .cell.p50 { background: rgba(255,153,0,.40); border-color: rgba(255,153,0,.6); color: #fff; }
+  .cell.p75 { background: rgba(255,153,0,.62); border-color: rgba(255,153,0,.8); color: #000; }
+  .cell.p100 { background: var(--grad-1); border-color: transparent; color: #000; font-weight: 700; box-shadow: 0 0 10px rgba(255,153,0,.6); }
+  .cell.today { outline: 2px solid var(--accent-3); outline-offset: 2px; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { outline-color: var(--accent-3); } 50% { outline-color: var(--accent); } }
+
+  /* ───── motivation banner ───── */
+  .quote { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; font-style: italic; color: var(--fg); position: relative; }
+  .quote::before { content: "❝"; position: absolute; top: -2px; right: 14px; font-size: 32px; color: var(--accent); opacity: .35; }
+  .quote .who { display: block; font-style: normal; color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+  /* ───── day card ───── */
+  .day { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 12px; overflow: hidden; transition: all .25s; position: relative; }
+  .day:hover { border-color: rgba(255,153,0,.4); }
+  .day-head { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; user-select: none; }
+  .day-head:hover { background: var(--panel-2); }
+  .day-num { color: var(--muted); font-size: 11px; margin-right: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 7px; background: var(--panel-2); border-radius: 4px; }
+  .day-title { font-weight: 600; font-size: 14px; }
+  .day-pct { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .day-pct b { color: var(--ok); font-size: 13px; }
+  .mini-ring { width: 28px; height: 28px; }
+  .day-body { padding: 4px 18px 16px; border-top: 1px solid var(--line); display: none; }
+  .day.open .day-body { display: block; animation: slideDown .25s ease-out; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+  /* ───── DAY COMPLETED — cross out treatment ───── */
+  .day.completed { background: linear-gradient(135deg, rgba(74,222,128,.06), rgba(20,110,180,.06)); border-color: rgba(74,222,128,.3); }
+  .day.completed::after {
+    content: "✓ DONE";
+    position: absolute; top: 50%; right: 22px; transform: translateY(-50%) rotate(-8deg);
+    font-size: 32px; font-weight: 900; letter-spacing: .1em;
+    color: var(--ok); opacity: .25;
+    pointer-events: none;
+    text-shadow: 0 0 30px rgba(74,222,128,.6);
+  }
+  .day.completed .day-title { color: var(--muted); position: relative; }
+  .day.completed .day-title::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    border-top: 2px solid rgba(74,222,128,.7);
+    transform: scaleX(1); transform-origin: left;
+    animation: strikeThrough .6s ease-out;
+  }
+  @keyframes strikeThrough { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .day.completed .day-num { background: var(--ok); color: #000; }
+  .day.completed .day-pct b { color: var(--ok); }
+
+  /* ───── tasks ───── */
+  .block { margin: 14px 0; padding-left: 4px; }
+  .block-head { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .block-head b { color: var(--accent); margin-right: 6px; font-size: 12px; }
+  ul.tasks { list-style: none; padding: 0; margin: 0; }
+  ul.tasks li { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); align-items: flex-start; transition: background .2s; border-radius: 4px; padding-left: 6px; padding-right: 6px; }
+  ul.tasks li:hover { background: rgba(255,153,0,.04); }
+  ul.tasks li:last-child { border: 0; }
+  ul.tasks input[type=checkbox] { margin-top: 3px; accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px; }
+  .task-text { flex: 1; transition: all .25s; }
+  .task-text.done { color: var(--muted); text-decoration: line-through; opacity: .6; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; letter-spacing: .03em; }
+  .b-E { background: rgba(96,165,250,.18); color: var(--easy); }
+  .b-M { background: rgba(251,191,36,.18); color: var(--med); }
+  .b-H { background: rgba(248,113,113,.18); color: var(--hard); }
+  .b-P { background: rgba(138,147,163,.18); color: var(--muted); }
+  .links { display: inline-flex; gap: 6px; margin-left: 8px; flex-wrap: wrap; }
+  .links a { font-size: 11px; padding: 2px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: var(--panel-2); transition: all .2s; }
+  .links a:hover { color: var(--accent); border-color: var(--accent); text-decoration: none; transform: translateY(-1px); }
+  .tag { font-size: 10px; padding: 2px 7px; border-radius: 99px; margin-right: 8px; font-weight: 700; letter-spacing: .04em; }
+  .t-DSA { background: rgba(20,110,180,.22); color: var(--accent-2); }
+  .t-SD  { background: rgba(255,153,0,.20); color: var(--accent); }
+  .t-LP  { background: rgba(74,222,128,.18); color: var(--ok); }
+  .t-BE  { background: rgba(168,85,247,.20); color: #c084fc; }
+  .t-LX  { background: rgba(251,191,36,.18); color: var(--warn); }
+  .t-MK  { background: rgba(248,113,113,.20); color: var(--hard); }
+  .t-PY  { background: rgba(96,165,250,.18); color: var(--easy); }
+  .t-REV { background: rgba(138,147,163,.18); color: var(--muted); }
+  .t-LAB { background: rgba(251,191,36,.20); color: var(--warn); }
+
+  /* ───── phase banner ───── */
+  .phase-banner { padding: 12px 16px; background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 100%); border-left: 4px solid var(--accent); margin: 18px 0 10px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+  .phase-banner b { color: var(--accent); letter-spacing: .04em; }
+
+  /* ───── panels (resources / grind / lp tabs) ───── */
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+  .panel h2 { margin: 0 0 12px; font-size: 16px; color: var(--accent); }
+  .panel h3 { margin: 14px 0 6px; font-size: 13px; color: var(--fg); border-bottom: 1px solid var(--line); padding-bottom: 5px; letter-spacing: .03em; }
+  .panel ul { padding-left: 18px; margin: 4px 0; }
+  .panel li { padding: 2px 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+  @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  details { margin: 4px 0; }
+  details summary { cursor: pointer; padding: 4px 0; color: var(--muted); }
+  details summary:hover { color: var(--fg); }
+  details[open] summary { color: var(--fg); }
+  .lp-card { background: var(--panel-2); border-radius: 8px; padding: 12px 16px; margin: 10px 0; border-left: 3px solid var(--ok); }
+  .lp-card h4 { margin: 0 0 6px; color: var(--ok); font-size: 14px; }
+  .lp-card .red { color: var(--hard); font-size: 12px; }
+
+  .hidden { display: none !important; }
+
+  /* ───── celebration toast ───── */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: var(--grad-1); color: #000; padding: 14px 22px; border-radius: 99px; font-weight: 700; box-shadow: 0 12px 36px rgba(255,153,0,.6); z-index: 100; transition: transform .4s cubic-bezier(.22,1.4,.36,1); pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ───── confetti ───── */
+  canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
+
+  /* ───── controls (search/import/export/theme) ───── */
+  .controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+  .controls input[type=text] { background: var(--panel-2); border: 1px solid var(--line); color: var(--fg); padding: 7px 12px; border-radius: 99px; font-size: 12px; min-width: 220px; outline: none; transition: all .2s; }
+  .controls input[type=text]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,153,0,.15); }
+  .controls button.icon { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); padding: 6px 12px; border-radius: 99px; cursor: pointer; font-size: 12px; transition: all .2s; }
+  .controls button.icon:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .controls button.primary { background: var(--grad-1); color: #000; border: 0; font-weight: 700; box-shadow: 0 4px 12px rgba(255,153,0,.4); }
+  .controls button.primary:hover { transform: translateY(-1px); }
+
+  /* ───── search results ───── */
+  .search-results { position: absolute; top: 100%; left: 20px; right: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; max-height: 360px; overflow-y: auto; z-index: 20; box-shadow: 0 12px 36px rgba(0,0,0,.4); display: none; margin-top: 8px; }
+  .search-results.show { display: block; }
+  .search-results .hit { padding: 10px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .search-results .hit:hover { background: var(--panel-2); }
+  .search-results .hit:last-child { border: 0; }
+  .search-results .hit .meta { color: var(--muted); font-size: 11px; }
+
+  /* ───── timer ───── */
+  .timer-btn { background: var(--panel-2); border: 1px solid var(--line); color: var(--muted); padding: 3px 10px; border-radius: 99px; cursor: pointer; font-size: 11px; margin-left: 8px; transition: all .2s; }
+  .timer-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .timer-btn.running { background: var(--grad-1); color: #000; border-color: transparent; font-weight: 700; }
+  .timer-btn.done { background: var(--ok); color: #000; border-color: transparent; }
+
+  /* ───── achievements ───── */
+  .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+  .achv { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; transition: all .25s; opacity: .42; filter: grayscale(.7); }
+  .achv.earned { opacity: 1; filter: none; border-color: rgba(255,153,0,.4); box-shadow: 0 4px 18px rgba(255,153,0,.18); background: linear-gradient(135deg, var(--panel-2) 0%, rgba(255,153,0,.06) 100%); }
+  .achv .ico { font-size: 32px; margin-bottom: 6px; }
+  .achv .name { font-weight: 700; font-size: 13px; color: var(--fg); }
+  .achv .desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ───── modal ───── */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.78); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-bg.show { display: flex; animation: fadeIn .2s; }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  .modal { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .modal h2 { margin: 0 0 12px; color: var(--accent); font-size: 22px; }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .modal h2 { background: var(--grad-1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  }
+  .modal .close { float: right; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 22px; line-height: 1; }
+  .modal .close:hover { color: var(--accent); }
+
+  /* ───── note field ───── */
+  .note-input { display: block; width: 100%; margin-top: 4px; padding: 5px 8px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; color: var(--fg); font-size: 11px; font-family: inherit; resize: vertical; min-height: 22px; max-height: 100px; outline: none; }
+  .note-input:focus { border-color: var(--accent); }
+  .note-toggle { color: var(--muted); cursor: pointer; font-size: 11px; margin-left: 6px; user-select: none; }
+  .note-toggle:hover { color: var(--accent); }
+  .note-toggle.has-note { color: var(--warn); }
+
+  /* ───── mistake log ───── */
+  .mistake-row { padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; }
+  .mistake-row:last-child { border: 0; }
+  .mistake-row .due { padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .mistake-row .due.overdue { background: rgba(248,113,113,.2); color: var(--hard); }
+  .mistake-row .due.upcoming { background: rgba(251,191,36,.2); color: var(--warn); }
+  .mistake-row .due.future { background: var(--panel-2); color: var(--muted); }
+  .mistake-row .body { flex: 1; }
+  .mistake-row .body .name { font-weight: 600; }
+  .mistake-row .body .note { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .mistake-row .actions { display: flex; gap: 6px; }
+  .mistake-row .actions button { background: var(--panel-2); border: 1px solid var(--line); color: var(--fg); padding: 4px 10px; border-radius: 99px; font-size: 11px; cursor: pointer; }
+  .mistake-row .actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ───── view mode pills ───── */
+  .view-mode { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px; gap: 2px; }
+  .view-mode button { background: transparent; border: 0; color: var(--muted); padding: 4px 14px; border-radius: 99px; cursor: pointer; font-size: 11px; }
+  .view-mode button.active { background: var(--grad-1); color: #000; font-weight: 700; }
+
+  /* ───── shortcut hint ───── */
+  .kbd { display: inline-block; padding: 2px 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; font-size: 10px; font-family: ui-monospace, "SF Mono", monospace; color: var(--muted); }
+
+  /* ───── calendar (month grid) ───── */
+  .heatmap-tabs { display: inline-flex; gap: 2px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px; margin-left: auto; }
+  .heatmap-tabs button { background: transparent; border: 0; color: var(--muted); padding: 4px 12px; border-radius: 99px; cursor: pointer; font-size: 11px; }
+  .heatmap-tabs button.active { background: var(--grad-1); color: #000; font-weight: 700; }
+  .grid-wrap header.row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .grid-wrap header.row h3 { margin: 0; flex: 1; }
+  .calendar-month { margin-bottom: 18px; }
+  .calendar-month h4 { margin: 6px 0 8px; font-size: 13px; color: var(--fg); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-grid .dow { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; text-align: center; padding: 4px 0; }
+  .cal-cell { aspect-ratio: 1/1; min-height: 44px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); padding: 2px; transition: all .2s; cursor: default; }
+  .cal-cell.has-day { cursor: pointer; }
+  .cal-cell.has-day:hover { transform: scale(1.04); border-color: var(--accent); z-index: 2; }
+  .cal-cell .date-num { font-size: 13px; font-weight: 700; color: var(--fg); }
+  .cal-cell .day-label { font-size: 9px; color: var(--muted); }
+  .cal-cell.p25 { background: rgba(255,153,0,.18); border-color: rgba(255,153,0,.35); }
+  .cal-cell.p50 { background: rgba(255,153,0,.40); border-color: rgba(255,153,0,.6); }
+  .cal-cell.p75 { background: rgba(255,153,0,.62); border-color: rgba(255,153,0,.8); }
+  .cal-cell.p100 { background: var(--grad-1); border-color: transparent; box-shadow: 0 0 10px rgba(255,153,0,.6); }
+  .cal-cell.p100 .date-num, .cal-cell.p100 .day-label { color: #000; }
+  .cal-cell.today { outline: 2px solid var(--accent-3); outline-offset: 2px; animation: pulse 2s ease-in-out infinite; }
+  .cal-cell.dim { opacity: .35; }
+
+  /* ───── charts ───── */
+  .charts { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-top: 12px; }
+  @media (max-width: 720px) { .charts { grid-template-columns: 1fr; } }
+  .chart-box { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .chart-box h4 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .jars { display: flex; align-items: flex-end; gap: 10px; height: 130px; padding-top: 18px; padding-bottom: 18px; }
+  .jar { flex: 1; height: 100%; background: var(--panel); border: 2px solid var(--accent-2); border-radius: 4px 4px 10px 10px; position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
+  .jar .water {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: var(--accent-2);
+    transition: height .8s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 -2px 10px rgba(20,110,180,.4) inset;
+  }
+  .jar .water::before, .jar .water::after {
+    content: ""; position: absolute; left: -10%; right: -10%;
+    height: 12px; top: -6px;
+    background: var(--accent-2);
+    border-radius: 50%;
+    animation: wave 3.5s ease-in-out infinite;
+  }
+  .jar .water::after { animation-duration: 5s; animation-delay: -1.2s; opacity: .55; }
+  @keyframes wave {
+    0%,100% { transform: translateX(-4%); }
+    50%     { transform: translateX( 4%); }
+  }
+  .jar.full { border-color: var(--ok); }
+  .jar.full .water, .jar.full .water::before, .jar.full .water::after { background: var(--ok); }
+  .jar .v { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--fg); font-weight: 700; }
+  .jar .lbl { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--muted); font-weight: 600; }
+  .pie { width: 100%; aspect-ratio: 1/1; max-width: 140px; margin: 0 auto; display: block; }
+  .pie .pie-hole  { fill: var(--panel-2); }
+  .pie .pie-num   { fill: var(--fg);    font-size: 0.32px; font-weight: 700; }
+  .pie .pie-label { fill: var(--muted); font-size: 0.14px; }
+  .pie-legend { display: flex; flex-direction: column; gap: 3px; font-size: 11px; margin-top: 8px; }
+  .pie-legend .row { display: flex; align-items: center; gap: 6px; }
+  .pie-legend .swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ───── focus rings (a11y) ───── */
+  /* Hide default focus outline only for pointer users, keep for keyboard */
+  button:focus:not(:focus-visible), a:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: 0; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ───── profile name field ───── */
+  .profile-name { background: transparent; border: 0; color: var(--fg); font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; outline: none; max-width: 140px; }
+  .profile-name:hover, .profile-name:focus { background: var(--panel-2); }
+
+  /* ───── mobile ───── */
+  @media (max-width: 720px) {
+    header { padding: 10px 12px; }
+    header h1 { font-size: 16px; }
+    main { padding: 12px; }
+    .top-row { flex-direction: column; align-items: stretch; gap: 10px; }
+    .stats { gap: 6px; }
+    .stats .pill { padding: 3px 8px; font-size: 11px; }
+    .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+    .tabs button { flex-shrink: 0; padding: 8px 14px; }
+    .controls { gap: 6px; }
+    .controls input[type=text] { min-width: 0; flex: 1; }
+    .controls .kbd { display: none; }
+    nav.weeks { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    nav.weeks button { flex-shrink: 0; padding: 8px 14px; }
+    .day-head { padding: 14px 14px; }
+    ul.tasks input[type=checkbox] { width: 22px; height: 22px; margin-top: 1px; }
+    .timer-btn, .links a, .badge, .tag { padding: 4px 10px; }
+    .grid-60 { grid-template-columns: repeat(10, 1fr); }
+  }
+
+  /* ───── print ───── */
+  @media print {
+    body::before, header, .controls, nav.weeks, .tabs, #toast, #confetti, .modal-bg, .heatmap-tabs, .timer-btn, .note-toggle, .note-input, label[data-noteid], .resume, #resume, #search, #search-results { display: none !important; }
+    body { background: #fff; color: #000; }
+    .day { page-break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
+    .day-body { display: block !important; border-top: 1px solid #ddd; }
+    .panel, .grid-wrap { border: 1px solid #ccc; box-shadow: none; }
+    .quote, .phase-banner { box-shadow: none; }
+    a { color: #1d4ed8; text-decoration: underline; }
+    .day.completed::after { display: none; }
+    .day.completed { background: #f5fffa !important; border-color: #aaa !important; }
+    h1 { color: #000 !important; -webkit-text-fill-color: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header style="position: sticky;">
+  <div class="top-row">
+    <div>
+      <h1>🚀 Amazon SDE Tracker · <input type="text" id="profile-name" class="profile-name" placeholder="your name" maxlength="32" aria-label="Your name" /></h1>
+      <div class="sub">Python backend · Grind 169 · ~29 hrs/week · Topic-progressive · ~250 hrs total</div>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" aria-label="Overall progress"><div class="progress-fill" id="bar"></div></div>
+      <div class="stats">
+        <span class="pill"><b id="done">0</b>/<b id="total">0</b> tasks</span>
+        <span class="pill streak">🔥 Streak <b id="streak">0</b></span>
+        <span class="pill level">⭐ Level <b id="level">1</b> · <b id="xp">0</b> XP</span>
+        <span class="pill">📅 Day <b id="day-completed">0</b>/60</span>
+        <span class="pill">DSA <b id="s-dsa">0</b></span>
+        <span class="pill">SD <b id="s-sd">0</b></span>
+        <span class="pill">LP <b id="s-lp">0</b></span>
+        <span class="pill">BE <b id="s-be">0</b></span>
+        <span class="pill">Mocks <b id="s-mk">0</b></span>
+        <span class="pill">Labs <b id="s-lab">0</b></span>
+      </div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button data-view="schedule" class="active" role="tab">Schedule</button>
+      <button data-view="resources" role="tab">Resources</button>
+      <button data-view="grind" role="tab">Grind 169</button>
+      <button data-view="lp" role="tab">LP Playbook</button>
+      <button data-view="achievements" role="tab">🏆 Badges</button>
+      <button data-view="mistakes" role="tab">📝 Mistakes</button>
+    </div>
+  </div>
+
+  <div class="controls" style="position:relative">
+    <div class="view-mode" role="tablist" aria-label="Schedule view">
+      <button data-mode="today" class="active" role="tab">Today</button>
+      <button data-mode="all" role="tab">All weeks</button>
+    </div>
+    <input type="text" id="search" placeholder='🔍 Search problems, topics, days  (press "/")' autocomplete="off" aria-label="Search" />
+    <div id="search-results" class="search-results" role="listbox"></div>
+    <button class="icon primary" id="resume" title="Jump to next unfinished task" aria-label="Resume next task">⏵ Resume</button>
+    <button class="icon" id="theme-toggle" title="Cycle theme: dark / light / high-contrast" aria-label="Toggle theme">🌓</button>
+    <button class="icon" id="sound-toggle" title="Toggle completion sounds" aria-label="Toggle sound">🔊</button>
+    <button class="icon" id="print-btn" title="Print or save as PDF" aria-label="Print">🖨</button>
+    <button class="icon" id="export-btn" title="Export progress as JSON" aria-label="Export progress">⬇ Export</button>
+    <button class="icon" id="import-btn" title="Import progress JSON" aria-label="Import progress">⬆ Import</button>
+    <input type="file" id="import-file" accept="application/json" style="display:none" />
+    <span class="kbd" title="Keyboard shortcuts">? for help</span>
+  </div>
+
+  <nav class="weeks" id="weeks" aria-label="Week navigation"></nav>
+</header>
+
+<canvas id="confetti"></canvas>
+<div id="toast" class="toast"></div>
+<div id="modal-bg" class="modal-bg"><div class="modal" id="modal"></div></div>
+
+<main>
+  <section id="view-schedule"></section>
+  <section id="view-resources" class="hidden"></section>
+  <section id="view-grind" class="hidden"></section>
+  <section id="view-lp" class="hidden"></section>
+  <section id="view-achievements" class="hidden"></section>
+  <section id="view-mistakes" class="hidden"></section>
+</main>
+
+<script>
+const LC = s => `https://leetcode.com/problems/${s}/`;
+const SS = s => `https://sadservers.com/scenarios/${s}/`;
+const YT = q => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+const BBG = "https://www.youtube.com/@ByteByteGo";
+const GS  = "https://www.youtube.com/@gkcs";
+const SDP = "https://github.com/donnemartin/system-design-primer";
+const DDIA = "https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/";
+const CFL = "https://www.cloudflare.com/learning/";
+const BANDIT = "https://overthewire.org/wargames/bandit/";
+const FASTAPI = "https://fastapi.tiangolo.com/";
+const SQLA = "https://docs.sqlalchemy.org/";
+const ALEMBIC = "https://alembic.sqlalchemy.org/";
+const PRAMP = "https://www.pramp.com/";
+const IIO = "https://interviewing.io/";
+
+// ---- DSA library: name -> {slug, diff, premium?} ----
+const DSA = {
+  // arrays
+  "Two Sum": ["two-sum","E"],
+  "Best Time to Buy and Sell Stock": ["best-time-to-buy-and-sell-stock","E"],
+  "Contains Duplicate": ["contains-duplicate","E"],
+  "Majority Element": ["majority-element","E"],
+  "Move Zeroes": ["move-zeroes","E"],
+  "Squares of a Sorted Array": ["squares-of-a-sorted-array","E"],
+  "Maximum Subarray": ["maximum-subarray","M"],
+  "Insert Interval": ["insert-interval","M"],
+  "3Sum": ["3sum","M"],
+  "Product of Array Except Self": ["product-of-array-except-self","M"],
+  "Combination Sum": ["combination-sum","M"],
+  "Merge Intervals": ["merge-intervals","M"],
+  "Sort Colors": ["sort-colors","M"],
+  "Container With Most Water": ["container-with-most-water","M"],
+  "Gas Station": ["gas-station","M"],
+  "Longest Consecutive Sequence": ["longest-consecutive-sequence","M"],
+  "Rotate Array": ["rotate-array","M"],
+  "Contiguous Array": ["contiguous-array","M"],
+  "Subarray Sum Equals K": ["subarray-sum-equals-k","M"],
+  "Meeting Rooms II": ["meeting-rooms-ii","M",true],
+  "3Sum Closest": ["3sum-closest","M"],
+  "Non-overlapping Intervals": ["non-overlapping-intervals","M"],
+  "Insert Delete GetRandom O(1)": ["insert-delete-getrandom-o1","M"],
+  "Pow(x, n)": ["powx-n","M"],
+  "Reverse Integer": ["reverse-integer","M"],
+  "Random Pick with Weight": ["random-pick-with-weight","M"],
+  "Find the Duplicate Number": ["find-the-duplicate-number","M"],
+  "Sliding Window Maximum": ["sliding-window-maximum","H"],
+  "Employee Free Time": ["employee-free-time","H",true],
+  "First Missing Positive": ["first-missing-positive","H"],
+  // hash
+  "Ransom Note": ["ransom-note","E"],
+  // math
+  "Roman to Integer": ["roman-to-integer","E"],
+  "Palindrome Number": ["palindrome-number","E"],
+  // binary
+  "Add Binary": ["add-binary","E"],
+  "Single Number": ["single-number","E"],
+  "Missing Number": ["missing-number","E"],
+  "Number of 1 Bits": ["number-of-1-bits","E"],
+  "Counting Bits": ["counting-bits","E"],
+  "Reverse Bits": ["reverse-bits","E"],
+  // strings
+  "Valid Palindrome": ["valid-palindrome","E"],
+  "Valid Anagram": ["valid-anagram","E"],
+  "Longest Palindrome": ["longest-palindrome","E"],
+  "Longest Common Prefix": ["longest-common-prefix","E"],
+  "Longest Substring Without Repeating Characters": ["longest-substring-without-repeating-characters","M"],
+  "String to Integer (atoi)": ["string-to-integer-atoi","M"],
+  "Longest Palindromic Substring": ["longest-palindromic-substring","M"],
+  "Find All Anagrams in a String": ["find-all-anagrams-in-a-string","M"],
+  "Group Anagrams": ["group-anagrams","M"],
+  "Longest Repeating Character Replacement": ["longest-repeating-character-replacement","M"],
+  "Largest Number": ["largest-number","M"],
+  "Encode and Decode Strings": ["encode-and-decode-strings","M",true],
+  "Minimum Window Substring": ["minimum-window-substring","H"],
+  "Palindrome Pairs": ["palindrome-pairs","H"],
+  // stack
+  "Valid Parentheses": ["valid-parentheses","E"],
+  "Implement Queue using Stacks": ["implement-queue-using-stacks","E"],
+  "Backspace String Compare": ["backspace-string-compare","E"],
+  "Min Stack": ["min-stack","M"],
+  "Evaluate Reverse Polish Notation": ["evaluate-reverse-polish-notation","M"],
+  "Daily Temperatures": ["daily-temperatures","M"],
+  "Decode String": ["decode-string","M"],
+  "Asteroid Collision": ["asteroid-collision","M"],
+  "Basic Calculator II": ["basic-calculator-ii","M"],
+  "Trapping Rain Water": ["trapping-rain-water","H"],
+  "Largest Rectangle in Histogram": ["largest-rectangle-in-histogram","H"],
+  "Basic Calculator": ["basic-calculator","H"],
+  "Maximum Frequency Stack": ["maximum-frequency-stack","H"],
+  "Longest Valid Parentheses": ["longest-valid-parentheses","H"],
+  // linked list
+  "Merge Two Sorted Lists": ["merge-two-sorted-lists","E"],
+  "Linked List Cycle": ["linked-list-cycle","E"],
+  "Reverse Linked List": ["reverse-linked-list","E"],
+  "Middle of the Linked List": ["middle-of-the-linked-list","E"],
+  "Palindrome Linked List": ["palindrome-linked-list","E"],
+  "LRU Cache": ["lru-cache","M"],
+  "Remove Nth Node From End of List": ["remove-nth-node-from-end-of-list","M"],
+  "Swap Nodes in Pairs": ["swap-nodes-in-pairs","M"],
+  "Odd Even Linked List": ["odd-even-linked-list","M"],
+  "Add Two Numbers": ["add-two-numbers","M"],
+  "Sort List": ["sort-list","M"],
+  "Reorder List": ["reorder-list","M"],
+  "Rotate List": ["rotate-list","M"],
+  "Reverse Nodes in k-Group": ["reverse-nodes-in-k-group","H"],
+  // binary search
+  "Binary Search": ["binary-search","E"],
+  "First Bad Version": ["first-bad-version","E"],
+  "Search in Rotated Sorted Array": ["search-in-rotated-sorted-array","M"],
+  "Find Minimum in Rotated Sorted Array": ["find-minimum-in-rotated-sorted-array","M"],
+  "Search a 2D Matrix": ["search-a-2d-matrix","M"],
+  "Time Based Key-Value Store": ["time-based-key-value-store","M"],
+  "Maximum Profit in Job Scheduling": ["maximum-profit-in-job-scheduling","H"],
+  "Median of Two Sorted Arrays": ["median-of-two-sorted-arrays","H"],
+  // binary tree
+  "Invert Binary Tree": ["invert-binary-tree","E"],
+  "Maximum Depth of Binary Tree": ["maximum-depth-of-binary-tree","E"],
+  "Same Tree": ["same-tree","E"],
+  "Symmetric Tree": ["symmetric-tree","E"],
+  "Subtree of Another Tree": ["subtree-of-another-tree","E"],
+  "Balanced Binary Tree": ["balanced-binary-tree","E"],
+  "Diameter of Binary Tree": ["diameter-of-binary-tree","E"],
+  "Binary Tree Level Order Traversal": ["binary-tree-level-order-traversal","M"],
+  "Binary Tree Right Side View": ["binary-tree-right-side-view","M"],
+  "Lowest Common Ancestor of a Binary Tree": ["lowest-common-ancestor-of-a-binary-tree","M"],
+  "Construct Binary Tree from Preorder and Inorder Traversal": ["construct-binary-tree-from-preorder-and-inorder-traversal","M"],
+  "Path Sum II": ["path-sum-ii","M"],
+  "Path Sum III": ["path-sum-iii","M"],
+  "Binary Tree Zigzag Level Order Traversal": ["binary-tree-zigzag-level-order-traversal","M"],
+  "Maximum Width of Binary Tree": ["maximum-width-of-binary-tree","M"],
+  "All Nodes Distance K in Binary Tree": ["all-nodes-distance-k-in-binary-tree","M"],
+  "Serialize and Deserialize Binary Tree": ["serialize-and-deserialize-binary-tree","H"],
+  "Binary Tree Maximum Path Sum": ["binary-tree-maximum-path-sum","H"],
+  // BST
+  "Lowest Common Ancestor of a BST": ["lowest-common-ancestor-of-a-binary-search-tree","E"],
+  "Convert Sorted Array to BST": ["convert-sorted-array-to-binary-search-tree","E"],
+  "Validate Binary Search Tree": ["validate-binary-search-tree","M"],
+  "Kth Smallest Element in a BST": ["kth-smallest-element-in-a-bst","M"],
+  "Inorder Successor in BST": ["inorder-successor-in-bst","M",true],
+  // graph
+  "Flood Fill": ["flood-fill","E"],
+  "Number of Islands": ["number-of-islands","M"],
+  "Rotting Oranges": ["rotting-oranges","M"],
+  "Clone Graph": ["clone-graph","M"],
+  "01 Matrix": ["01-matrix","M"],
+  "Word Search": ["word-search","M"],
+  "Course Schedule": ["course-schedule","M"],
+  "Course Schedule II": ["course-schedule-ii","M"],
+  "Number of Connected Components": ["number-of-connected-components-in-an-undirected-graph","M",true],
+  "Graph Valid Tree": ["graph-valid-tree","M",true],
+  "Accounts Merge": ["accounts-merge","M"],
+  "Pacific Atlantic Water Flow": ["pacific-atlantic-water-flow","M"],
+  "Minimum Height Trees": ["minimum-height-trees","M"],
+  "Minimum Knight Moves": ["minimum-knight-moves","M",true],
+  "Cheapest Flights Within K Stops": ["cheapest-flights-within-k-stops","M"],
+  "Shortest Path to Get Food": ["shortest-path-to-get-food","M",true],
+  "Word Ladder": ["word-ladder","H"],
+  "Word Search II": ["word-search-ii","H"],
+  "Alien Dictionary": ["alien-dictionary","H",true],
+  "Longest Increasing Path in a Matrix": ["longest-increasing-path-in-a-matrix","H"],
+  "Bus Routes": ["bus-routes","H"],
+  // heap
+  "K Closest Points to Origin": ["k-closest-points-to-origin","M"],
+  "Task Scheduler": ["task-scheduler","M"],
+  "Top K Frequent Words": ["top-k-frequent-words","M"],
+  "Find K Closest Elements": ["find-k-closest-elements","M"],
+  "Kth Largest Element in an Array": ["kth-largest-element-in-an-array","M"],
+  "Find Median from Data Stream": ["find-median-from-data-stream","H"],
+  "Merge k Sorted Lists": ["merge-k-sorted-lists","H"],
+  "Smallest Range Covering Elements from K Lists": ["smallest-range-covering-elements-from-k-lists","H"],
+  // trie
+  "Implement Trie (Prefix Tree)": ["implement-trie-prefix-tree","M"],
+  "Word Break": ["word-break","M"],
+  "Design Add and Search Words Data Structure": ["design-add-and-search-words-data-structure","M"],
+  "Design In-Memory File System": ["design-in-memory-file-system","H",true],
+  // recursion
+  "Permutations": ["permutations","M"],
+  "Subsets": ["subsets","M"],
+  "Letter Combinations of a Phone Number": ["letter-combinations-of-a-phone-number","M"],
+  "Generate Parentheses": ["generate-parentheses","M"],
+  "Next Permutation": ["next-permutation","M"],
+  "N-Queens": ["n-queens","H"],
+  // matrix
+  "Spiral Matrix": ["spiral-matrix","M"],
+  "Valid Sudoku": ["valid-sudoku","M"],
+  "Rotate Image": ["rotate-image","M"],
+  "Set Matrix Zeroes": ["set-matrix-zeroes","M"],
+  "Sudoku Solver": ["sudoku-solver","H"],
+  // queue
+  "Design Hit Counter": ["design-hit-counter","M",true],
+  // dp
+  "Climbing Stairs": ["climbing-stairs","E"],
+  "House Robber": ["house-robber","M"],
+  "Coin Change": ["coin-change","M"],
+  "Partition Equal Subset Sum": ["partition-equal-subset-sum","M"],
+  "Unique Paths": ["unique-paths","M"],
+  "Maximum Product Subarray": ["maximum-product-subarray","M"],
+  "Longest Increasing Subsequence": ["longest-increasing-subsequence","M"],
+  "Jump Game": ["jump-game","M"],
+  "Maximal Square": ["maximal-square","M"],
+  "Decode Ways": ["decode-ways","M"],
+  "Combination Sum IV": ["combination-sum-iv","M"]
+};
+
+// Helpers to build tasks compactly
+const dsa = (...names) => ({type:"dsa", names});
+const rev = (text) => ({type:"rev", text:`REVIEW: ${text}`});
+const sd  = (text, links=[]) => ({type:"sd", text, links});
+const lp  = (text) => ({type:"lp", text});
+const be  = (text, links=[]) => ({type:"be", text, links});
+const lab = (text, links=[]) => ({type:"lab", text, links});
+const mk  = (text, links=[]) => ({type:"mk", text, links});
+const py  = (text, links=[]) => ({type:"py", text, links});
+const note= (text) => ({type:"note", text});
+
+const slot = (name, time, ...tasks) => ({slot:name, time, tasks});
+
+
+// ====================================================================
+// 60-DAY SCHEDULE
+// ====================================================================
+const SCHEDULE = [
+
+// ───────── WEEK 1 ─────────
+{day:1, dow:"Mon", week:1, title:"Array Easy",
+ slots:[
+  slot("AM",60, dsa("Two Sum"), note("Create tracker spreadsheet, mistake log, Anki deck")),
+  slot("LU",30, sd('Read "Latency numbers every programmer should know" + skim System Design Primer intro',
+                   [["Latency Numbers","https://gist.github.com/jboner/2841832"],["System Design Primer",SDP]])),
+  slot("NT",90, dsa("Best Time to Buy and Sell Stock","Contains Duplicate"))
+ ]},
+{day:2, dow:"Tue", week:1, title:"Array Easy + Hash",
+ slots:[
+  slot("AM",60, dsa("Majority Element")),
+  slot("LU",30, sd('ByteByteGo "What is System Design?" (~10m) — extract: 4 layers (client, network, server, data)',
+                   [["ByteByteGo channel",BBG],["Search: What is System Design",YT("ByteByteGo what is system design")]])),
+  slot("NT",90, dsa("Move Zeroes","Squares of a Sorted Array"))
+ ]},
+{day:3, dow:"Wed", week:1, title:"Array Easy wrap + Hash + Math",
+ slots:[
+  slot("AM",60, dsa("Ransom Note"), rev("re-solve Two Sum, no peeking")),
+  slot("LU",30, lp('Read 16 LPs once. For each top-6 LP (Customer Obsession, Ownership, Dive Deep, Bias for Action, Deliver Results, Earn Trust) write a 1-line "have I done this?" seed. Goal: 6 raw seeds.')),
+  slot("NT",90, dsa("Roman to Integer","Palindrome Number"))
+ ]},
+{day:4, dow:"Thu", week:1, title:"Binary Easy",
+ slots:[
+  slot("AM",60, dsa("Add Binary"), rev("Best Time Buy/Sell")),
+  slot("LU",30, sd('System Design Primer: "Performance vs Scalability" + "Latency vs Throughput"',
+                   [["Primer chapter",SDP+"#performance-vs-scalability"]])),
+  slot("NT",90, dsa("Single Number","Missing Number"))
+ ]},
+{day:5, dow:"Fri", week:1, title:"Binary Easy + first Med",
+ slots:[
+  slot("AM",60, dsa("Number of 1 Bits"), rev("Move Zeroes")),
+  slot("LU",30, lp("Customer Obsession seed: pick ONE bug or metric you owned where end-users were silently impacted. Write S/T/A/R bullets with a number (users affected, error rate, latency).")),
+  slot("NT",90, dsa("Counting Bits","Maximum Subarray"))
+ ]},
+{day:6, dow:"Sat", week:1, title:"LONG BLOCK · Array Mediums + Python eng",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4 from W1: Two Sum, Squares, Single Number, Missing Number")),
+  slot("Block 2",90, dsa("Insert Interval","3Sum")),
+  slot("Block 3",90, dsa("Product of Array Except Self","Combination Sum")),
+  slot("Block 4",120, py("Parse a 100k-line log file: aggregate ERROR per service + p95 latency. Use generators (memory), Counter, dataclasses.",
+                         [["Generators",  "https://docs.python.org/3/howto/functional.html#generators"],
+                          ["Counter",     "https://docs.python.org/3/library/collections.html#collections.Counter"],
+                          ["dataclasses", "https://docs.python.org/3/library/dataclasses.html"]])),
+  slot("Block 5",60, lp("Refine the 2 stories drafted (Customer Obsession + Ownership). Convert bullets to full STAR prose, ≤ 2 min spoken. Add: 1 metric, 1 lesson, 1 thing you'd do differently."))
+ ]},
+{day:7, dow:"Sun", week:1, title:"LONG BLOCK · Array Mediums + Bandit + SD intro",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP — list every Array pattern seen so far; re-solve 3Sum + Insert Interval")),
+  slot("Block 2",90, dsa("Merge Intervals","Sort Colors")),
+  slot("Block 3",90, dsa("Container With Most Water","Gas Station")),
+  slot("Block 4",60, lab("OverTheWire Bandit levels 0–15 (SSH/grep/find muscle memory)", [["Bandit",BANDIT]])),
+  slot("Block 5",60, sd('ByteByteGo "Top 6 Load Balancing Algorithms" + "Top 5 Cache Strategies". Extract: when to use round-robin vs least-conn vs hashing; cache-aside vs write-through.',
+                        [["ByteByteGo",BBG],
+                         ["Search LB algos",YT("ByteByteGo top 6 load balancing algorithms")],
+                         ["Search cache strategies",YT("ByteByteGo top 5 cache strategies")]])),
+  slot("Block 6",30, note("Weekly scorecard, plan W2"))
+ ]},
+
+// ───────── WEEK 2 ─────────
+{day:8, dow:"Mon", week:2, title:"Array Med",
+ slots:[
+  slot("AM",60, dsa("Longest Consecutive Sequence"), rev("3Sum")),
+  slot("LU",30, sd('Gaurav Sen "Consistent Hashing" (~20m). Extract: virtual nodes, hot-spot fix, when to use vs mod-N hashing.',
+                   [["Gaurav Sen channel",GS],["Search consistent hashing",YT("Gaurav Sen consistent hashing")]])),
+  slot("NT",90, dsa("Rotate Array","Contiguous Array"))
+ ]},
+{day:9, dow:"Tue", week:2, title:"Array Med",
+ slots:[
+  slot("AM",60, dsa("Subarray Sum Equals K"), rev("Merge Intervals")),
+  slot("LU",30, lp("Ownership story: a problem outside your team's scope (broken dashboard, missing runbook, flaky test, legacy service) you adopted and fixed end-to-end. Full STAR with $ saved or hours reclaimed.")),
+  slot("NT",90, dsa("Meeting Rooms II","3Sum Closest"))
+ ]},
+{day:10, dow:"Wed", week:2, title:"Array Med wrap + Hash + Math",
+ slots:[
+  slot("AM",60, dsa("Non-overlapping Intervals"), rev("Container With Most Water")),
+  slot("LU",30, sd('DDIA Ch.1 "Reliability, Scalability, Maintainability". Extract: definitions of each, fault vs failure, p99 vs avg.', [["DDIA",DDIA]])),
+  slot("NT",90, dsa("Insert Delete GetRandom O(1)","Pow(x, n)"))
+ ]},
+{day:11, dow:"Thu", week:2, title:"Array Hard + Math Med",
+ slots:[
+  slot("AM",60, dsa("Sliding Window Maximum"), rev("Subarray Sum K")),
+  slot("LU",30, lp("Dive Deep story: a bug that took >1 day to root-cause. Write the debugging path explicitly: logs → metrics → strace/EXPLAIN/flame graph → source code → fix. Interviewers will probe each step.")),
+  slot("NT",90, dsa("Reverse Integer","Random Pick with Weight"))
+ ]},
+{day:12, dow:"Fri", week:2, title:"Array Hard + Hash Hard",
+ slots:[
+  slot("AM",60, dsa("Employee Free Time"), rev("Sort Colors")),
+  slot("LU",30, sd('ByteByteGo "Database Sharding" + "ACID vs BASE". Extract: range vs hash sharding, how 2PC differs from saga.',
+                   [["Search sharding",YT("ByteByteGo database sharding")],
+                    ["Search ACID vs BASE",YT("ByteByteGo ACID BASE")]])),
+  slot("NT",90, dsa("Find the Duplicate Number","First Missing Positive"))
+ ]},
+{day:13, dow:"Sat", week:2, title:"LONG BLOCK · Strings start + Project 1 setup + lab",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4 from W2: Longest Consecutive, Insert Delete GetRandom, Pow, Find Duplicate")),
+  slot("Block 2",90, dsa("Valid Palindrome","Valid Anagram","Longest Palindrome")),
+  slot("Block 3",90, dsa("Longest Common Prefix","Longest Substring Without Repeating Characters")),
+  slot("Block 4",120, be("Project 1 (Task Mgmt API): FastAPI scaffold + Postgres + Alembic init + User/Task models",
+                         [["FastAPI",FASTAPI],["SQLAlchemy",SQLA],["Alembic",ALEMBIC]])),
+  slot("Block 5",60, lab('SadServers "Bilbao" (K8s easy) OR "Kampot" (easy linux). Practice debug narration aloud.',
+                         [["Bilbao",SS("bilbao")],["Kampot",SS("kampot")]]))
+ ]},
+{day:14, dow:"Sun", week:2, title:"LONG BLOCK · Strings cont. + Bandit + LP",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP Arrays — patterns: sliding window, two-pointer, prefix sum, hash freq, intervals; re-solve Sliding Window Max")),
+  slot("Block 2",90, dsa("String to Integer (atoi)","Longest Palindromic Substring")),
+  slot("Block 3",90, dsa("Find All Anagrams in a String","Group Anagrams")),
+  slot("Block 4",60, lab("Bandit 16–24 (SSH keys, port scanning, basic networking)", [["Bandit",BANDIT]])),
+  slot("Block 5",60, lp("Refine all 4 drafted stories (Customer Obsession, Ownership, Dive Deep + 1 more). Add: explicit metric, 1 lesson, 1 anticipated probing question + your answer.")),
+  slot("Block 6",30, note("Weekly scorecard"))
+ ]},
+
+// ───────── WEEK 3 ─────────
+{day:15, dow:"Mon", week:3, title:"String Med",
+ slots:[
+  slot("AM",60, dsa("Longest Repeating Character Replacement"), rev("Group Anagrams")),
+  slot("LU",30, sd('ByteByteGo "SQL vs NoSQL" + "Top 6 Database Models". Extract: when relational vs document vs KV vs columnar.',
+                   [["Search SQL vs NoSQL",YT("ByteByteGo SQL vs NoSQL")],
+                    ["Search DB models",YT("ByteByteGo top 6 database models")]])),
+  slot("NT",90, dsa("Largest Number","Encode and Decode Strings"))
+ ]},
+{day:16, dow:"Tue", week:3, title:"String Hard",
+ slots:[
+  slot("AM",60, dsa("Minimum Window Substring"), rev("Longest Substring No Repeat")),
+  slot("LU",30, sd('Cloudflare Learning: "What is a CDN?" + "How HTTPS works". Extract: cache hierarchy, TLS handshake steps.',
+                   [["What is a CDN",CFL+"cdn/what-is-a-cdn/"],
+                    ["How HTTPS works",CFL+"ssl/what-happens-in-a-tls-handshake/"]])),
+  slot("NT",90, dsa("Palindrome Pairs"))
+ ]},
+{day:17, dow:"Wed", week:3, title:"Stack Easy",
+ slots:[
+  slot("AM",60, dsa("Valid Parentheses"), rev("Min Window Substring")),
+  slot("LU",30, lp('Earn Trust story: a code/design review where you disagreed with a senior eng. Show your data-driven argument, the moment you updated your view (or held firm), and the outcome. Avoid "I won".')),
+  slot("NT",90, dsa("Implement Queue using Stacks","Backspace String Compare"))
+ ]},
+{day:18, dow:"Thu", week:3, title:"Stack Med",
+ slots:[
+  slot("AM",60, dsa("Min Stack"), rev("Valid Parentheses")),
+  slot("LU",30, sd('Gaurav Sen "Designing TinyURL" (~30m). Extract: hash vs counter, base62, DB schema, 301 vs 302.',
+                   [["Search TinyURL",YT("Gaurav Sen designing TinyURL")]])),
+  slot("NT",90, dsa("Evaluate Reverse Polish Notation","Daily Temperatures"))
+ ]},
+{day:19, dow:"Fri", week:3, title:"Stack Med",
+ slots:[
+  slot("AM",60, dsa("Decode String"), rev("Daily Temperatures")),
+  slot("LU",30, lp("Bias for Action story: an outage where you took a reversible mitigation (rollback, feature flag, traffic shift, hotfix) BEFORE full RCA. Be explicit about the risk you accepted and how you bounded blast radius.")),
+  slot("NT",90, dsa("Asteroid Collision","Basic Calculator II"))
+ ]},
+{day:20, dow:"Sat", week:3, title:"LONG BLOCK · Stack Hards + Project 1 build + lab",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4 stack/string: Decode String, Valid Parens, atoi, Group Anagrams")),
+  slot("Block 2",120, dsa("Trapping Rain Water","Largest Rectangle in Histogram")),
+  slot("Block 3",150, be("Project 1: Pydantic schemas, POST/GET /tasks, validation, error handling",
+                          [["Pydantic","https://docs.pydantic.dev/"]])),
+  slot("Block 4",60, sd("Design URL Shortener: APIs, hashing, DB schema, capacity estimate. Write up. Compare hash vs auto-increment.",
+                        [["Reference (TinyURL)",YT("Gaurav Sen designing TinyURL")]])),
+  slot("Block 5",30, lab('SadServers "Tokyo" (web file serve). Narrate debug aloud.', [["Tokyo",SS("tokyo")]]))
+ ]},
+{day:21, dow:"Sun", week:3, title:"LONG BLOCK · LL Easy + recap + project + lab",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP Strings + Stack — patterns: sliding window, anagram counter, monotonic stack, parsing. Re-solve Min Stack.")),
+  slot("Block 2",90, dsa("Merge Two Sorted Lists","Linked List Cycle","Reverse Linked List")),
+  slot("Block 3",120, be("Project 1: JWT auth scaffold, password hashing (passlib), login/signup endpoints",
+                          [["passlib","https://passlib.readthedocs.io/"],
+                           ["FastAPI security",FASTAPI+"tutorial/security/"]])),
+  slot("Block 4",60, sd("Design Rate Limiter: token bucket vs leaky bucket vs fixed window vs sliding window. Write up.",
+                        [["Search rate limiter design",YT("system design rate limiter")]])),
+  slot("Block 5",45, lab('SadServers "Cape Town" (Borked Nginx) OR "Salta" (Docker won\'t start)',
+                          [["Cape Town",SS("cape-town")],["Salta",SS("salta")]])),
+  slot("Block 6",15, note("Weekly scorecard"))
+ ]},
+
+// ───────── WEEK 4 ─────────
+{day:22, dow:"Mon", week:4, title:"LL Easy + Med",
+ slots:[
+  slot("AM",60, dsa("Middle of the Linked List"), rev("Reverse Linked List")),
+  slot("LU",30, sd('ByteByteGo "Top 10 System Design Concepts" or "API Design". Extract: REST vs gRPC, idempotency, pagination styles.',
+                   [["Search top 10 SD",YT("ByteByteGo top 10 system design concepts")]])),
+  slot("NT",90, dsa("Palindrome Linked List","LRU Cache"))
+ ]},
+{day:23, dow:"Tue", week:4, title:"LL Med",
+ slots:[
+  slot("AM",60, dsa("Remove Nth Node From End of List"), rev("LRU Cache")),
+  slot("LU",30, lp("Deliver Results story: a project shipped under pressure where you moved a measurable KPI (p99, errors, cost, availability). Include the tradeoff — what you cut to keep the critical path.")),
+  slot("NT",90, dsa("Swap Nodes in Pairs","Odd Even Linked List"))
+ ]},
+{day:24, dow:"Wed", week:4, title:"LL Med",
+ slots:[
+  slot("AM",60, dsa("Add Two Numbers"), rev("Remove Nth Node")),
+  slot("LU",30, sd('DDIA Ch.3 "Storage and Retrieval" intro. Extract: LSM-tree vs B-tree, write amplification, when each wins.', [["DDIA",DDIA]])),
+  slot("NT",90, dsa("Sort List","Reorder List"))
+ ]},
+{day:25, dow:"Thu", week:4, title:"LL Med + Hard",
+ slots:[
+  slot("AM",60, dsa("Rotate List"), rev("Sort List")),
+  slot("LU",30, sd('Gaurav Sen "Apache Kafka Internals" or generic "Message Queues". Extract: log-structured storage, consumer groups, at-least-once semantics.',
+                   [["Search Kafka",YT("Gaurav Sen Kafka")]])),
+  slot("NT",90, dsa("Reverse Nodes in k-Group"))
+ ]},
+{day:26, dow:"Fri", week:4, title:"Stack Hards remaining",
+ slots:[
+  slot("AM",60, dsa("Basic Calculator"), rev("Reverse k-Group")),
+  slot("LU",30, lp("Failure story (Earn Trust + Ownership): a real prod miss / missed estimate / design call you got wrong. Own it, no blame. Show the lesson and how you applied it next time.")),
+  slot("NT",90, dsa("Maximum Frequency Stack","Longest Valid Parentheses"))
+ ]},
+{day:27, dow:"Sat", week:4, title:"LONG BLOCK · Binary Search + Project 1 + lab",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4 LL/stack hards: LRU, Reorder List, Largest Rectangle, Basic Calc")),
+  slot("Block 2",90, dsa("Binary Search","First Bad Version")),
+  slot("Block 3",90, dsa("Search in Rotated Sorted Array","Find Minimum in Rotated Sorted Array")),
+  slot("Block 4",90, be("Project 1: pagination, ownership checks, structured logging (JSON logs)",
+                         [["Python logging cookbook","https://docs.python.org/3/howto/logging-cookbook.html"]])),
+  slot("Block 5",45, sd("Design Notification System (email/SMS/push): queue + retry + idempotency. Write up.",
+                        [["Search notification system",YT("system design notification service")]])),
+  slot("Block 6",45, lab('SadServers "Manhattan" (DB write fail). Practice systematic debugging.', [["Manhattan",SS("manhattan")]]))
+ ]},
+{day:28, dow:"Sun", week:4, title:"LONG BLOCK · BS Hards + Project 1 ship + lab",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP LL + BS — patterns: slow/fast, dummy node, search-on-answer. Re-solve Search Rotated.")),
+  slot("Block 2",90, dsa("Search a 2D Matrix","Time Based Key-Value Store")),
+  slot("Block 3",90, dsa("Maximum Profit in Job Scheduling","Median of Two Sorted Arrays")),
+  slot("Block 4",90, be("Project 1 SHIP: pytest tests, README, GitHub push, postman collection",
+                         [["pytest","https://docs.pytest.org/"]])),
+  slot("Block 5",45, lab('SadServers "Lisbon" (etcd SSL) OR "Helsingør" (postgres replication)',
+                          [["Lisbon",SS("lisbon")],["Helsingør",SS("helsingor")]])),
+  slot("Block 6",15, lp("Review all 6 stories so far. Record yourself telling the 2 weakest on phone. Listen back. Note 'we' → fix to 'I'."))
+ ]},
+
+
+// ───────── WEEK 5 ─────────
+{day:29, dow:"Mon", week:5, title:"BT Easy",
+ slots:[
+  slot("AM",60, dsa("Invert Binary Tree"), rev("Median of Two Sorted (or any rest)")),
+  slot("LU",30, sd('ByteByteGo "How DNS Works" or "Top Networking Protocols". Extract: recursive vs iterative resolution, TTL, DNS-based LB.',
+                   [["Search DNS",YT("ByteByteGo how DNS works")],
+                    ["Search networking protocols",YT("ByteByteGo top networking protocols")]])),
+  slot("NT",90, dsa("Maximum Depth of Binary Tree","Same Tree"))
+ ]},
+{day:30, dow:"Tue", week:5, title:"BT Easy",
+ slots:[
+  slot("AM",60, dsa("Symmetric Tree"), rev("Invert Binary Tree")),
+  slot("LU",30, sd('Gaurav Sen "Load Balancing L4 vs L7" or "API Gateway". Extract: where to terminate TLS, sticky sessions, gateway responsibilities.',
+                   [["Search L4 vs L7",YT("Gaurav Sen load balancer L4 L7")],
+                    ["Search API Gateway",YT("Gaurav Sen API Gateway")]])),
+  slot("NT",90, dsa("Subtree of Another Tree","Balanced Binary Tree"))
+ ]},
+{day:31, dow:"Wed", week:5, title:"BT Easy wrap + Med start",
+ slots:[
+  slot("AM",60, dsa("Diameter of Binary Tree"), rev("Subtree of Another Tree")),
+  slot("LU",30, lp("Ambiguity story (Bias for Action + Deliver Results): a project with unclear requirements where you defined scope, made assumptions explicit, and moved forward. Show the doc/spec/decision you produced.")),
+  slot("NT",90, dsa("Binary Tree Level Order Traversal","Binary Tree Right Side View"))
+ ]},
+{day:32, dow:"Thu", week:5, title:"BT Med",
+ slots:[
+  slot("AM",60, dsa("Lowest Common Ancestor of a Binary Tree"), rev("Level Order Traversal")),
+  slot("LU",30, sd('System Design Primer "Caching" section: write-through, write-back, cache-aside, refresh-ahead.',
+                   [["Primer caching",SDP+"#cache"]])),
+  slot("NT",90, dsa("Construct Binary Tree from Preorder and Inorder Traversal","Path Sum II"))
+ ]},
+{day:33, dow:"Fri", week:5, title:"BT Med",
+ slots:[
+  slot("AM",60, dsa("Path Sum III"), rev("LCA of Binary Tree")),
+  slot("LU",30, lp("Silent rehearsal: tell the Ownership story in your head, timer running. Target ≤ 2 min. Note where you went over time or got stuck — those are the parts to tighten.")),
+  slot("NT",90, dsa("Binary Tree Zigzag Level Order Traversal","Maximum Width of Binary Tree"))
+ ]},
+{day:34, dow:"Sat", week:5, title:"LONG BLOCK · BT wrap + first MK + Project 2",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4 BT Easy: Invert, Max Depth, Diameter, Symmetric")),
+  slot("Block 2",90, dsa("All Nodes Distance K in Binary Tree")),
+  slot("Block 3",120, dsa("Serialize and Deserialize Binary Tree","Binary Tree Maximum Path Sum")),
+  slot("Block 4",90, be("Project 2 (E-commerce) kickoff: User/Product/Cart/Order schema + Alembic migration",
+                          [["Alembic",ALEMBIC]])),
+  slot("Block 5",60, mk("Pramp coding mock (medium array/hashmap) + debrief",[["Pramp",PRAMP]]))
+ ]},
+{day:35, dow:"Sun", week:5, title:"LONG BLOCK · BST + recap + Project 2 + SD + lab",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP Trees — patterns: DFS post-order, BFS, top-down vs bottom-up. Re-solve LCA.")),
+  slot("Block 2",90, dsa("Lowest Common Ancestor of a BST","Convert Sorted Array to BST")),
+  slot("Block 3",90, dsa("Validate Binary Search Tree","Kth Smallest Element in a BST","Inorder Successor in BST")),
+  slot("Block 4",90, be("Project 2: product CRUD + JWT auth + pagination + filtering")),
+  slot("Block 5",45, lab('SadServers "Buenos Aires" (K8s pod crash) OR "Warsaw" (Prometheus scrape)',
+                          [["Buenos Aires",SS("buenos-aires")],["Warsaw",SS("warsaw")]])),
+  slot("Block 6",15, lp("Conflict story: a peer disagreement (technical, not interpersonal) resolved via data, prototype, or compromise. Primary Earn Trust, secondary Have Backbone."))
+ ]},
+
+// ───────── WEEK 6 ─────────
+{day:36, dow:"Mon", week:6, title:"Graph Easy + Med start",
+ slots:[
+  slot("AM",60, dsa("Flood Fill"), rev("Validate BST")),
+  slot("LU",30, sd('Gaurav Sen "Designing Twitter" (focus on fanout-on-write vs read). Extract: hybrid push/pull, celebrity problem.',
+                   [["Search Twitter design",YT("Gaurav Sen designing Twitter")]])),
+  slot("NT",90, dsa("Number of Islands","Rotting Oranges"))
+ ]},
+{day:37, dow:"Tue", week:6, title:"Graph Med",
+ slots:[
+  slot("AM",60, dsa("Clone Graph"), rev("Number of Islands")),
+  slot("LU",30, sd('ByteByteGo "Kafka vs RabbitMQ vs SQS" or "Event-Driven Architecture". Extract: log-based vs broker, ordering, retention.',
+                   [["Search Kafka vs Rabbit",YT("ByteByteGo Kafka vs RabbitMQ vs SQS")]])),
+  slot("NT",90, dsa("01 Matrix","Word Search"))
+ ]},
+{day:38, dow:"Wed", week:6, title:"Graph Med (topo / UF)",
+ slots:[
+  slot("AM",60, dsa("Course Schedule"), rev("Clone Graph")),
+  slot("LU",30, lp("Operational/oncall story (Dive Deep + Ownership): a real production incident you led. Cover detection → triage → mitigation → root cause → preventive action. Include MTTR or impact metric.")),
+  slot("NT",90, dsa("Course Schedule II","Number of Connected Components"))
+ ]},
+{day:39, dow:"Thu", week:6, title:"Graph Med",
+ slots:[
+  slot("AM",60, dsa("Graph Valid Tree"), rev("Course Schedule")),
+  slot("LU",30, sd('DDIA Ch.5 "Replication" intro. Extract: leader-follower, sync vs async, replication lag, read-your-writes.', [["DDIA",DDIA]])),
+  slot("NT",90, dsa("Accounts Merge","Pacific Atlantic Water Flow"))
+ ]},
+{day:40, dow:"Fri", week:6, title:"Graph Med",
+ slots:[
+  slot("AM",60, dsa("Minimum Height Trees"), rev("Pacific Atlantic Water Flow")),
+  slot("LU",30, sd('Gaurav Sen "Microservices Architecture" or "Database Sharding". Extract: service boundaries, saga, range vs hash sharding.',
+                   [["Search microservices",YT("Gaurav Sen microservices")]])),
+  slot("NT",90, dsa("Minimum Knight Moves","Cheapest Flights Within K Stops"))
+ ]},
+{day:41, dow:"Sat", week:6, title:"LONG BLOCK · Graph wrap + Project 2 + MK + lab",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4 graphs: Number of Islands, Rotting Oranges, Course Schedule II, Pacific Atlantic")),
+  slot("Block 2",90, dsa("Shortest Path to Get Food")),
+  slot("Block 3",120, dsa("Word Ladder","Word Search II")),
+  slot("Block 4",90, be("Project 2: cart endpoints, transactional checkout, optimistic stock check (SQLAlchemy SELECT FOR UPDATE or version column)",
+                          [["SQLA pessimistic",SQLA+"orm/queryguide/api.html#sqlalchemy.orm.Query.with_for_update"]])),
+  slot("Block 5",45, mk("Pramp coding mock (tree/graph) + debrief",[["Pramp",PRAMP]])),
+  slot("Block 6",15, lab('Pickup any pending: SadServers "Cape Town" or "Salta"',
+                          [["Cape Town",SS("cape-town")],["Salta",SS("salta")]]))
+ ]},
+{day:42, dow:"Sun", week:6, title:"LONG BLOCK · Graph Hards + Project 2 + SD + lab",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP Graphs — patterns: BFS shortest, DFS visit, topo sort, union-find, Dijkstra. Re-solve Course Schedule II.")),
+  slot("Block 2",120, dsa("Alien Dictionary","Longest Increasing Path in a Matrix")),
+  slot("Block 3",60, dsa("Bus Routes")),
+  slot("Block 4",60, be("Project 2: Dockerize app + Postgres, docker-compose, .env handling",
+                         [["Docker Compose","https://docs.docker.com/compose/"],
+                          ["FastAPI Docker",FASTAPI+"deployment/docker/"]])),
+  slot("Block 5",60, sd("Design Log Aggregation Pipeline (agents → queue → storage → query). Write up. Compare ELK vs Loki vs CloudWatch.",
+                        [["Search log aggregation design",YT("system design log aggregation")]])),
+  slot("Block 6",30, lab('SadServers "Moyogalpa" (security) OR "Tarifa" (between two seas)',
+                          [["Moyogalpa",SS("moyogalpa")],["Tarifa",SS("tarifa")]]))
+ ]},
+
+// ───────── WEEK 7 ─────────
+{day:43, dow:"Mon", week:7, title:"Heap Med",
+ slots:[
+  slot("AM",60, dsa("K Closest Points to Origin"), rev("Word Ladder")),
+  slot("LU",30, sd('ByteByteGo "Top 5 Cache Strategies" or "How Redis Works". Extract: cache-aside flow, Redis as cache vs primary store, eviction policies.',
+                   [["Search cache strategies",YT("ByteByteGo top 5 cache strategies")],
+                    ["Search Redis",YT("ByteByteGo how Redis works")]])),
+  slot("NT",90, dsa("Task Scheduler","Top K Frequent Words"))
+ ]},
+{day:44, dow:"Tue", week:7, title:"Heap Med + Hard",
+ slots:[
+  slot("AM",60, dsa("Find K Closest Elements"), rev("K Closest Points to Origin")),
+  slot("LU",30, sd('Gaurav Sen "Designing Uber" or "Designing WhatsApp". Extract: geohashing, presence, message ordering.',
+                   [["Search Uber design",YT("Gaurav Sen designing Uber")],
+                    ["Search WhatsApp design",YT("Gaurav Sen designing WhatsApp")]])),
+  slot("NT",90, dsa("Kth Largest Element in an Array","Find Median from Data Stream"))
+ ]},
+{day:45, dow:"Wed", week:7, title:"Heap Hard + MK day",
+ slots:[
+  slot("AM",60, dsa("Merge k Sorted Lists"), rev("Find Median from Data Stream")),
+  slot("LU",30, lp("Pick your 3 strongest stories. Time silently — ≤ 90s core, ≤ 2 min with probing follow-ups. Write 2 anticipated follow-ups per story.")),
+  slot("NT",90, mk("Interviewing.io coding mock (Amazon-style) + debrief",[["Interviewing.io",IIO]]))
+ ]},
+{day:46, dow:"Thu", week:7, title:"Heap Hard + Trie",
+ slots:[
+  slot("AM",60, dsa("Smallest Range Covering Elements from K Lists"), rev("Merge k Sorted Lists")),
+  slot("LU",30, sd('Cloudflare Learning: "What is TLS?" + "What is a reverse proxy?". Extract: cipher suite negotiation, mTLS, when to use reverse proxy vs LB.',
+                   [["What is TLS",CFL+"ssl/transport-layer-security-tls/"],
+                    ["What is reverse proxy",CFL+"cdn/glossary/reverse-proxy/"]])),
+  slot("NT",90, dsa("Implement Trie (Prefix Tree)","Design Add and Search Words Data Structure"))
+ ]},
+{day:47, dow:"Fri", week:7, title:"Trie + Recursion start",
+ slots:[
+  slot("AM",60, dsa("Word Break"), rev("Implement Trie")),
+  slot("LU",30, sd('ByteByteGo "CAP Theorem" + "PACELC". Extract: CP vs AP examples, latency trade in non-partition state.',
+                   [["Search CAP",YT("ByteByteGo CAP theorem")],
+                    ["Search PACELC",YT("PACELC theorem")]])),
+  slot("NT",90, dsa("Design In-Memory File System","Permutations"))
+ ]},
+{day:48, dow:"Sat", week:7, title:"LONG BLOCK · Recursion + Matrix + MK + lab",
+ slots:[
+  slot("Block 1",60, rev("re-solve 4: Top K Frequent Words, Word Break, K Closest Points, Permutations")),
+  slot("Block 2",90, dsa("Subsets","Letter Combinations of a Phone Number")),
+  slot("Block 3",90, dsa("Generate Parentheses","Next Permutation")),
+  slot("Block 4",60, dsa("Spiral Matrix","Valid Sudoku")),
+  slot("Block 5",60, mk("Full coding mock (45 min, self-recorded or peer) + debrief")),
+  slot("Block 6",60, lab('SadServers "Hong-Kong" (Hard, DB write fail). Narrate debug.', [["Hong-Kong",SS("hong-kong")]]))
+ ]},
+{day:49, dow:"Sun", week:7, title:"LONG BLOCK · Matrix + Queue + Recursion Hard + recap + lab",
+ slots:[
+  slot("Block 1",90, rev("TOPIC RECAP Heap+Trie+Recursion — patterns: top-K, k-way merge, two-heap median, prefix tree, decision-tree pruning")),
+  slot("Block 2",90, dsa("Rotate Image","Set Matrix Zeroes")),
+  slot("Block 3",90, dsa("Sudoku Solver","N-Queens")),
+  slot("Block 4",60, dsa("Design Hit Counter")),
+  slot("Block 5",60, sd("Design Push Notification Service end-to-end. Write up. Cover device tokens, fanout, retries, dedup.",
+                        [["Search push notification design",YT("system design push notification")]])),
+  slot("Block 6",30, lab('SadServers "Pokhara" (SSH) OR "Belo-Horizonte" (Java enigma)',
+                          [["Pokhara",SS("pokhara")],["Belo-Horizonte",SS("belo-horizonte")]]))
+ ]},
+
+// ───────── WEEK 8 ─────────
+{day:50, dow:"Mon", week:8, title:"DP Easy + Med",
+ slots:[
+  slot("AM",60, dsa("Climbing Stairs"), rev("N-Queens")),
+  slot("LU",30, sd('ByteByteGo "Idempotency in REST APIs" or "Distributed Locks". Extract: idempotency-key header, dedup table, fencing tokens.',
+                   [["Search idempotency",YT("ByteByteGo idempotency REST")],
+                    ["Search distributed locks",YT("ByteByteGo distributed locks")]])),
+  slot("NT",90, dsa("House Robber"), rev("Maximum Subarray (re-solve)"))
+ ]},
+{day:51, dow:"Tue", week:8, title:"DP Med",
+ slots:[
+  slot("AM",60, dsa("Coin Change"), rev("House Robber")),
+  slot("LU",30, sd('Gaurav Sen "Auto-scaling" or "Designing Notification Service" (recap). Extract: scale triggers (CPU, queue depth), cooldown, predictive vs reactive.',
+                   [["Search auto-scaling",YT("Gaurav Sen auto scaling")]])),
+  slot("NT",90, dsa("Partition Equal Subset Sum","Unique Paths"),
+                note("Bonus (home, if time): SadServers Chennai")),
+ ]},
+{day:52, dow:"Wed", week:8, title:"DP Med (MK day)",
+ slots:[
+  slot("AM",60, dsa("Maximum Product Subarray"), rev("Coin Change")),
+  slot("LU",30, lp("For each top-6 LP, write 3 likely probing Qs (\"what would you do differently\", \"what was YOUR specific contribution\", \"how did peers react\", \"what was the metric before vs after\"). Draft 1–2 line answers.")),
+  slot("NT",90, mk("Pramp coding (hard problem) + debrief",[["Pramp",PRAMP]]))
+ ]},
+{day:53, dow:"Thu", week:8, title:"DP Med",
+ slots:[
+  slot("AM",60, dsa("Longest Increasing Subsequence"), rev("Max Product Subarray")),
+  slot("LU",30, sd('System Design Primer: "Idempotency" + "Retries with backoff" notes. Extract: full jitter vs decorrelated jitter, dead-letter queues.',
+                   [["Primer",SDP]])),
+  slot("NT",90, dsa("Jump Game","Maximal Square"))
+ ]},
+{day:54, dow:"Fri", week:8, title:"DP Med wrap",
+ slots:[
+  slot("AM",60, dsa("Decode Ways"), rev("Longest Increasing Subsequence")),
+  slot("LU",30, lp("Record yourself on phone telling 5 strongest stories back-to-back, no notes. Listen back at home: count uh/like, check we vs I, confirm metrics are concrete.")),
+  slot("NT",90, dsa("Combination Sum IV"),
+                note("Bonus (home, if time): SadServers Florence"))
+ ]},
+{day:55, dow:"Sat", week:8, title:"LONG BLOCK · Full mock loop simulation",
+ slots:[
+  slot("Block 1",60, mk("Coding round 1 (45 min)")),
+  slot("Block 2",60, mk("Coding round 2 (45 min)")),
+  slot("Block 3",60, mk("System design mock (45 min) — design API Gateway. Cover auth, rate-limit, routing, observability.")),
+  slot("Block 4",60, mk("Behavioral mock (4 LPs, 45 min)")),
+  slot("Block 5",120, note("Detailed debrief all 4. Identify top 3 fixes. Apply 1 critical fix today.")),
+  slot("Block 6",60, rev("Re-solve 3 hardest from W7: Sudoku Solver, Word Ladder, Find Median Stream"))
+ ]},
+{day:56, dow:"Sun", week:8, title:"LONG BLOCK · Hards revision + Amazon-tagged sweep",
+ slots:[
+  slot("Block 1",120, rev("Re-solve 6 weakest from mistake log")),
+  slot("Block 2",90, rev("DP TOPIC RECAP — patterns: 1D, 2D, knapsack, LIS, interval. Re-solve Coin Change.")),
+  slot("Block 3",90, sd("Quick redo of 3 prior designs in 20 min each: Rate Limiter, Notification System, Log Aggregation")),
+  slot("Block 4",60, lp("Final lock: 12 stories per LP STORY MATRIX, ≤ 2 min each, mapped to 1 primary + 1 secondary LP. Each has a metric and a lesson.")),
+  slot("Block 5",60, note("Amazon-tagged sweep on LeetCode: solve 3 from Amazon top-tagged",
+                            )),
+ ]},
+
+// ───────── TAPER ─────────
+{day:57, dow:"Mon", week:"Taper", title:"Light reps + cheat sheets",
+ slots:[
+  slot("AM",60, rev("Re-solve 3 favorite Mediums on timer: LRU Cache, Number of Islands, Merge Intervals")),
+  slot("LU",30, sd("Re-read your own SD cheat sheet (LB, cache, queue, DB pick, idempotency)")),
+  slot("NT",90, lp("Say all 12 stories aloud, no notes. Use LP STORY MATRIX. Stop and re-do any over 2 min or missing the metric/lesson."))
+ ]},
+{day:58, dow:"Tue", week:"Taper", title:"Light mock + sleep priority",
+ slots:[
+  slot("AM",60, rev("2 Easies on timer (warm-up only, no new patterns)")),
+  slot("LU",30, lp("Re-read your story bullets for top-6 LPs. Refresh metric and lesson. Light pass only — no rewrites.")),
+  slot("NT",60, mk("Short 30-min coding mock (peer or self-recorded). STOP at 60 min total. Sleep 8h.")),
+ ]},
+{day:59, dow:"Wed", week:"Taper", title:"Calm review",
+ slots:[
+  slot("AM",45, rev("1 Medium re-solve, focus on talking aloud")),
+  slot("LU",30, lp("Silent mental rehearsal of 5 strongest stories. Do NOT speak aloud, do NOT rewrite. Walk the STAR shape once each.")),
+  slot("NT",60, sd("Re-skim Primer notes. Logistics: laptop, IDE, Zoom, charger, water. No caffeine after 2pm.")),
+ ]},
+{day:60, dow:"Thu", week:"Taper", title:"Interview eve / day-of execution",
+ slots:[
+  slot("AM",30, rev("1 Easy on timer; do NOT attempt anything new")),
+  slot("LU",30, note("Review interview-day playbook; confirm setup; eat; hydrate")),
+  slot("NT",60, note("Box-breathing 4-4-4. Visualize first 90s + first problem clarification. Execute. Post-debrief immediately."))
+ ]}
+];
+
+// ====================================================================
+// CALENDAR REBASE — Day 1 = Monday, May 18, 2026
+// (First Monday after the candidate's "Day 1" goal of May 15.
+//  Anchoring on Monday keeps the original 7-hr long blocks on Sat/Sun,
+//  matching the candidate's Sat/Sun availability.)
+// ====================================================================
+const START_DATE = new Date(2026, 4, 18); // May 18, 2026 (Mon)
+(function attachDates(){
+  const NEW_DOW = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; // Day 1 = Mon
+  const FMT = (d) => d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+  SCHEDULE.forEach((d) => {
+    const dt = new Date(START_DATE.getTime());
+    dt.setDate(START_DATE.getDate() + (d.day - 1));
+    d.date = dt;
+    d.dow = NEW_DOW[(d.day - 1) % 7];
+    d.dateLabel = FMT(dt);
+  });
+})();
+
+// ====================================================================
+// RESOURCES CATALOG
+// ====================================================================
+const RESOURCES = {
+  "DSA · Grind 169": [
+    ["Grind 169 list (techinterviewhandbook)","https://www.techinterviewhandbook.org/grind75/?mode=all&order=topics"],
+    ["Grind 169 GitHub gist (full list)","https://gist.github.com/underscoDe/f129cc07dc4732cab0730f451451dea8"],
+    ["NeetCode roadmap","https://neetcode.io/roadmap"],
+    ["LeetCode Amazon-tagged","https://leetcode.com/company/amazon/"],
+    ["14 Patterns to Ace Coding Interviews","https://hackernoon.com/14-patterns-to-ace-any-coding-interview-question-c5bb3357f6ed"]
+  ],
+  "System Design · Videos": [
+    ["ByteByteGo (channel)",BBG],
+    ["Gaurav Sen (channel)",GS],
+    ["Search: Top 6 Load Balancing Algorithms",YT("ByteByteGo top 6 load balancing algorithms")],
+    ["Search: Top 5 Cache Strategies",YT("ByteByteGo top 5 cache strategies")],
+    ["Search: SQL vs NoSQL",YT("ByteByteGo SQL vs NoSQL")],
+    ["Search: Database Sharding",YT("ByteByteGo database sharding")],
+    ["Search: ACID vs BASE",YT("ByteByteGo ACID BASE")],
+    ["Search: How DNS Works",YT("ByteByteGo how DNS works")],
+    ["Search: How Redis Works",YT("ByteByteGo how Redis works")],
+    ["Search: CAP Theorem",YT("ByteByteGo CAP theorem")],
+    ["Search: Idempotency in REST",YT("ByteByteGo idempotency REST")],
+    ["Search: Top 10 SD Concepts",YT("ByteByteGo top 10 system design concepts")],
+    ["Search: Consistent Hashing",YT("Gaurav Sen consistent hashing")],
+    ["Search: Designing TinyURL",YT("Gaurav Sen designing TinyURL")],
+    ["Search: Designing Twitter",YT("Gaurav Sen designing Twitter")],
+    ["Search: Designing Uber",YT("Gaurav Sen designing Uber")],
+    ["Search: Designing WhatsApp",YT("Gaurav Sen designing WhatsApp")],
+    ["Search: Apache Kafka",YT("Gaurav Sen Kafka")],
+    ["Search: Microservices",YT("Gaurav Sen microservices")],
+    ["Search: API Gateway",YT("Gaurav Sen API Gateway")],
+    ["Search: L4 vs L7 LB",YT("Gaurav Sen load balancer L4 L7")]
+  ],
+  "System Design · Reading": [
+    ["System Design Primer (donnemartin)",SDP],
+    ["Latency numbers every programmer should know","https://gist.github.com/jboner/2841832"],
+    ["DDIA (Designing Data-Intensive Applications)",DDIA],
+    ["Cloudflare Learning hub",CFL],
+    ["What is a CDN",CFL+"cdn/what-is-a-cdn/"],
+    ["What is TLS",CFL+"ssl/transport-layer-security-tls/"],
+    ["TLS handshake",CFL+"ssl/what-happens-in-a-tls-handshake/"],
+    ["What is reverse proxy",CFL+"cdn/glossary/reverse-proxy/"],
+    ["AWS Builders' Library","https://aws.amazon.com/builders-library/"]
+  ],
+  "Backend · Python / FastAPI": [
+    ["FastAPI docs",FASTAPI],
+    ["FastAPI security tutorial",FASTAPI+"tutorial/security/"],
+    ["FastAPI Docker deployment",FASTAPI+"deployment/docker/"],
+    ["SQLAlchemy 2.x docs",SQLA],
+    ["Alembic docs",ALEMBIC],
+    ["Pydantic v2 docs","https://docs.pydantic.dev/"],
+    ["passlib (password hashing)","https://passlib.readthedocs.io/"],
+    ["pytest docs","https://docs.pytest.org/"],
+    ["Python logging cookbook","https://docs.python.org/3/howto/logging-cookbook.html"],
+    ["Python typing","https://docs.python.org/3/library/typing.html"],
+    ["asyncio docs","https://docs.python.org/3/library/asyncio.html"],
+    ["dataclasses","https://docs.python.org/3/library/dataclasses.html"],
+    ["collections.Counter","https://docs.python.org/3/library/collections.html#collections.Counter"],
+    ["Generators (functional howto)","https://docs.python.org/3/howto/functional.html#generators"],
+    ["Docker Compose","https://docs.docker.com/compose/"]
+  ],
+  "Linux / Networking · Labs": [
+    ["OverTheWire Bandit",BANDIT],
+    ["SadServers — realistic interviews","https://sadservers.com/tag/realistic-interviews"],
+    ["SadServers — all scenarios","https://sadservers.com/scenarios"],
+    ["Brendan Gregg (perf, flame graphs)","https://www.brendangregg.com/"],
+    ["Postgres EXPLAIN docs","https://www.postgresql.org/docs/current/sql-explain.html"]
+  ],
+  "Mocks": [
+    ["Pramp",PRAMP],
+    ["Interviewing.io",IIO]
+  ],
+  "Behavioral · LP": [
+    ["Amazon Leadership Principles","https://www.amazon.jobs/content/en/our-workplace/leadership-principles"],
+    ["Amazon SDE interview prep","https://www.amazon.jobs/en/landing_pages/in-person-interview"],
+    ["STAR method (career.berkeley.edu)","https://career.berkeley.edu/wp-content/uploads/2024/06/Behavioral-Interview-STARMethod.pdf"]
+  ]
+};
+
+// ====================================================================
+// LP PLAYBOOK DATA
+// ====================================================================
+const LP_DATA = [
+  { name:"Customer Obsession",
+    probe:["Did you advocate for end-user impact over team convenience?",
+           "Did you find a customer-facing pain point others missed?",
+           "Did you instrument something that surfaced silent failures?"],
+    seeds:["Bug you fixed that nobody had escalated, but real users were hitting",
+           "A latency/error metric you owned that you drove down by X%",
+           "Design decision where you pushed back on shortcuts that would degrade UX",
+           "Feature you built specifically because of customer feedback or support ticket trend",
+           "A time you shipped a smaller-scoped fix to unblock customers immediately"],
+    red:["'We' instead of 'I'", "No customer impact in numbers", "Story is about internal stakeholders, not real end users"] },
+  { name:"Ownership",
+    probe:["Did you take on a problem that wasn't strictly yours?",
+           "Did you fix root cause vs putting tape over symptoms?",
+           "Did you think long-term beyond the immediate ticket?"],
+    seeds:["Oncall page where you went past the runbook and fixed the underlying issue",
+           "Tech debt or flaky tests you fixed without being asked",
+           "A legacy service you adopted, documented, or modernized",
+           "Cross-team gap (logging, dashboards, runbooks) you closed",
+           "Automation you built that replaced manual ops work for the whole team"],
+    red:["Stopping at 'I filed a ticket' — owners drive the fix end-to-end","Blaming other teams; ownership means you owned the gap"] },
+  { name:"Dive Deep (highest weight for SDE)",
+    probe:["Can you reason at the kernel/network/DB/lib level when needed?",
+           "Do you read source code, packets, query plans, profiles?",
+           "Do you stop at 'it works' or actually understand WHY?"],
+    seeds:["Bug that took >1 day to root-cause; what was the debug path?",
+           "Perf problem solved by reading EXPLAIN plans, flame graphs, strace, tcpdump",
+           "Memory leak, race condition, or deadlock you isolated",
+           "Library/framework behavior you reverse-engineered by reading source",
+           "Metric anomaly investigated end-to-end (correlated logs/metrics/traces)"],
+    red:["'We added a retry' without explaining what was actually failing","Hand-waving the root cause","No technical depth in the Action section"] },
+  { name:"Bias for Action",
+    probe:["Can you act with incomplete information when speed matters?",
+           "Did you take a reversible decision fast vs waiting for consensus?",
+           "Did you ship a mitigation while the proper fix was in flight?"],
+    seeds:["Outage where you rolled back / blocked traffic / hotfixed before full RCA",
+           "POC built in 1–2 days to unblock a stalled discussion",
+           "Feature flag or canary you used to ship safely under uncertainty",
+           "Decision you made unilaterally because waiting would have made it worse",
+           "Automation built fast to stop a recurring oncall pain"],
+    red:["Action that wasn't actually reversible or risk-managed","'Acted fast' but no consideration of guardrails"] },
+  { name:"Deliver Results",
+    probe:["Did you ship despite blockers (deps, scope, deadlines)?",
+           "Did you move a real metric (latency, errors, cost, availability)?",
+           "Did you negotiate scope to hit the date without breaking the goal?"],
+    seeds:["Project shipped on time where 1+ thing went sideways",
+           "KPI moved by a measurable amount (e.g., p99 latency -40%, error rate -X bps)",
+           "Cost reduction delivered (instances, storage, egress) with $ saved",
+           "Migration/upgrade completed with zero downtime or tight cutover",
+           "Release where you descoped something to ship the critical path"],
+    red:["No before/after numbers","'I delivered' without explaining what tradeoff you made","Story is about effort, not outcome"] },
+  { name:"Earn Trust",
+    probe:["Can you disagree without being a jerk?",
+           "Do you back down when wrong, push back when right, with data?",
+           "Can peers and leaders rely on what you say?"],
+    seeds:["Code/design review where you disagreed with a senior engineer",
+           "A time you admitted publicly you were wrong and changed approach",
+           "A time you raised a hard truth (timeline slip, security, quality) early",
+           "Stakeholder you brought along by sharing data instead of pulling rank",
+           "Relationship you rebuilt after a mistake (incident, missed estimate)"],
+    red:["Stories where you 'won' by being loudest","No acknowledgment of the other side's valid points","Avoiding the disagreement entirely"] }
+];
+
+const LP_MATRIX = [
+  ["Production incident","Dive Deep","Ownership, Bias for Action"],
+  ["Customer-impact bug","Customer Obsession","Dive Deep"],
+  ["Perf optimization","Deliver Results","Dive Deep"],
+  ["Tech debt / refactor","Ownership","Earn Trust"],
+  ["Failure / mistake","Earn Trust","Ownership"],
+  ["Disagreement w/ senior","Earn Trust","Have Backbone"],
+  ["Hotfix / rollback under pressure","Bias for Action","Ownership"],
+  ["Cross-team unblock","Earn Trust","Deliver Results"],
+  ["Automation / runbook closure","Ownership","Customer Obsession"],
+  ["Migration / upgrade delivered","Deliver Results","Bias for Action"],
+  ["Hard bug root-caused","Dive Deep","Customer Obsession"],
+  ["Scope negotiation / descope","Deliver Results","Earn Trust"]
+];
+
+// ====================================================================
+// RENDER
+// ====================================================================
+const STORE_KEY = "amzn-tracker-v1";
+const state = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+function isDone(id){ return !!state[id]; }
+function setDone(id, v){ if(v) state[id]=1; else delete state[id]; save(); updateStats(); refreshHeatmapCells(); }
+
+// ───── notes & mistake log ─────
+const NOTES_KEY = "amzn-tracker-notes-v1";
+const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || "{}");
+function saveNotes(){ localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
+function getNote(id){ return notes[id] || {text:"", revisit:false, timestamps:[]}; }
+function setNote(id, patch){
+  const cur = getNote(id);
+  notes[id] = {...cur, ...patch};
+  saveNotes();
+}
+
+// ───── settings (theme, view mode, sound, profile, heatmap mode) ─────
+const SETTINGS_KEY = "amzn-tracker-settings-v1";
+const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{"theme":"dark","mode":"today","sound":false,"name":"","heatmap":"strip"}');
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+function applyTheme(){ document.documentElement.setAttribute("data-theme", settings.theme); }
+applyTheme();
+
+// ───── timers (per slot, ephemeral; not persisted) ─────
+const timers = {}; // key: dayN-slotI, value: {endsAt, intervalId}
+function renderTaskHTML(taskId, t){
+  const checked = isDone(taskId) ? "checked" : "";
+  const noteData = getNote(taskId);
+  const hasNote = !!noteData.text || noteData.revisit;
+  const noteCls = hasNote ? "note-toggle has-note" : "note-toggle";
+  const noteIcon = noteData.revisit ? "🔁" : (noteData.text ? "📝" : "+");
+  const noteUI = `<span class="${noteCls}" data-noteid="${taskId}" title="Add a note / mark for revisit">${noteIcon}</span>
+    <textarea class="note-input" data-noteid="${taskId}" placeholder="Note (what tripped you up, learning) · check ☐ revisit to add to mistake log" style="display:${hasNote||noteData._open?'block':'none'}">${noteData.text||""}</textarea>
+    <label style="font-size:11px;color:var(--muted);display:${hasNote||noteData._open?'inline-flex':'none'};align-items:center;gap:4px;margin-top:4px;cursor:pointer" data-noteid="${taskId}">
+      <input type=checkbox class="note-revisit" data-noteid="${taskId}" ${noteData.revisit?'checked':''}> mark for revisit
+    </label>`;
+  if(t.type === "dsa"){
+    const items = t.names.map(n => {
+      const meta = DSA[n];
+      if(!meta) return `<span>${n}</span>`;
+      const [slug, diff, premium] = meta;
+      const bclass = premium ? "b-P" : ("b-"+diff);
+      const dlabel = premium ? `${diff}·P` : diff;
+      return `<a href="${LC(slug)}" target="_blank" rel="noopener">${n}</a><span class="badge ${bclass}">${dlabel}</span>`;
+    }).join(" · ");
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-DSA">DSA</span>${items}${noteUI}</span></li>`;
+  }
+  if(t.type === "rev"){
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-REV">REVIEW</span>${t.text}${noteUI}</span></li>`;
+  }
+  if(t.type === "sd"){
+    const links = (t.links||[]).map(([n,u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join("");
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-SD">SD</span>${t.text} <span class="links">${links}</span>${noteUI}</span></li>`;
+  }
+  if(t.type === "lp"){
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-LP">LP</span>${t.text}${noteUI}</span></li>`;
+  }
+  if(t.type === "be"){
+    const links = (t.links||[]).map(([n,u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join("");
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-BE">BE</span>${t.text} <span class="links">${links}</span>${noteUI}</span></li>`;
+  }
+  if(t.type === "lab"){
+    const links = (t.links||[]).map(([n,u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join("");
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-LAB">LAB</span>${t.text} <span class="links">${links}</span>${noteUI}</span></li>`;
+  }
+  if(t.type === "mk"){
+    const links = (t.links||[]).map(([n,u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join("");
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-MK">MOCK</span>${t.text} <span class="links">${links}</span>${noteUI}</span></li>`;
+  }
+  if(t.type === "py"){
+    const links = (t.links||[]).map(([n,u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join("");
+    return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-PY">PY</span>${t.text} <span class="links">${links}</span>${noteUI}</span></li>`;
+  }
+  // note
+  return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text">${t.text}${noteUI}</span></li>`;
+}
+
+function phaseBanner(week){
+  const map = {
+    1:"⚡ Phase 1 · Foundations · Arrays + Hash + Math/Binary easies",
+    2:"⚡ Phase 1 · Foundations · Arrays Med finish + Strings start",
+    3:"🔧 Phase 2 · Core · Strings finish + Stack + LL start + Project 1",
+    4:"🔧 Phase 2 · Core · LL finish + Stack hards + Binary Search + Project 1 ship",
+    5:"🌳 Phase 3 · Advanced · Trees (BT + BST) + first mock + Project 2 kickoff",
+    6:"🕸 Phase 3 · Advanced · Graphs (BFS/DFS/topo) + Project 2 build",
+    7:"🎯 Phase 4 · Polish · Heap + Trie + Recursion + Matrix + 2 mocks",
+    8:"🎯 Phase 4 · Polish · DP + full mock loop + LP lock",
+    "Taper":"🧘 Phase 5 · Taper · No new problems · Confidence + sleep"
+  };
+  return `<div class="phase-banner"><b>WEEK ${week}</b> · ${map[week] || ""}</div>`;
+}
+
+const QUOTES = [
+  ["Slow is smooth. Smooth is fast.","Navy SEALs"],
+  ["Discipline equals freedom.","Jocko Willink"],
+  ["You don't rise to the level of your goals; you fall to the level of your systems.","James Clear"],
+  ["Hard work beats talent when talent doesn't work hard.","Tim Notke"],
+  ["The expert in anything was once a beginner.","Helen Hayes"],
+  ["Done is better than perfect.","Sheryl Sandberg"],
+  ["Compound interest is the eighth wonder of the world.","Einstein (apocryphal)"],
+  ["The only way out is through.","Robert Frost"],
+  ["You miss 100% of the shots you don't take.","Wayne Gretzky"],
+  ["First solve the problem. Then write the code.","John Johnson"],
+  ["Make it work, make it right, make it fast.","Kent Beck"],
+  ["The best time to plant a tree was 20 years ago. The second best time is now.","Chinese proverb"],
+  ["Amateurs sit and wait for inspiration. The rest of us just get up and go to work.","Stephen King"],
+  ["Talk is cheap. Show me the code.","Linus Torvalds"]
+];
+function quoteOfDay(){
+  const d = new Date();
+  const idx = (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % QUOTES.length;
+  return QUOTES[idx];
+}
+
+function renderHeatmap(){
+  const mode = settings.heatmap || "strip";
+  let html = `<div class="grid-wrap"><header class="row"><h3>📊 60-Day Progress</h3>
+    <div class="heatmap-tabs" role="tablist" aria-label="Progress view">
+      <button data-hm="strip" class="${mode==='strip'?'active':''}" role="tab">Strip</button>
+      <button data-hm="cal" class="${mode==='cal'?'active':''}" role="tab">Calendar</button>
+    </div></header>`;
+  if (mode === "cal") {
+    html += renderCalendar();
+  } else {
+    html += `<div class="grid-60" role="grid" aria-label="60-day strip">`;
+    SCHEDULE.forEach(d => {
+      const pct = dayPct(d);
+      let cls = "cell";
+      if (pct === 100) cls += " p100";
+      else if (pct >= 75) cls += " p75";
+      else if (pct >= 50) cls += " p50";
+      else if (pct >= 25) cls += " p25";
+      if (d.day === currentDay()) cls += " today";
+      html += `<div class="${cls}" data-day="${d.day}" role="gridcell" tabindex="0" aria-label="Day ${d.day}, ${d.dateLabel||''}, ${pct}% complete" title="Day ${d.day} · ${d.dateLabel||""} · ${d.title} · ${pct}%">${d.day}</div>`;
+    });
+    html += `</div>`;
+  }
+  // charts
+  html += renderCharts();
+  html += `</div>`;
+  return html;
+}
+
+function renderCalendar(){
+  // Build months from SCHEDULE.date list
+  const byMonth = {};
+  SCHEDULE.forEach(d => {
+    const key = `${d.date.getFullYear()}-${String(d.date.getMonth()).padStart(2,'0')}`;
+    if (!byMonth[key]) byMonth[key] = { year: d.date.getFullYear(), month: d.date.getMonth(), days: [] };
+    byMonth[key].days.push(d);
+  });
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const dows = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  let html = "";
+  Object.values(byMonth).sort((a,b) => (a.year-b.year)||(a.month-b.month)).forEach(m => {
+    html += `<div class="calendar-month"><h4>${monthNames[m.month]} ${m.year}</h4>`;
+    html += `<div class="cal-grid">`;
+    dows.forEach(d => html += `<div class="dow">${d}</div>`);
+    // first day of month: figure out leading blanks (Mon=0)
+    const firstWeekday = (new Date(m.year, m.month, 1).getDay() + 6) % 7; // shift Sun=6
+    for (let i = 0; i < firstWeekday; i++) html += `<div class="cal-cell dim"></div>`;
+    // each day of month
+    const lastDay = new Date(m.year, m.month + 1, 0).getDate();
+    for (let day = 1; day <= lastDay; day++){
+      const sched = m.days.find(x => x.date.getDate() === day);
+      if (sched){
+        const pct = dayPct(sched);
+        let cls = "cal-cell has-day";
+        if (pct === 100) cls += " p100";
+        else if (pct >= 75) cls += " p75";
+        else if (pct >= 50) cls += " p50";
+        else if (pct >= 25) cls += " p25";
+        if (sched.day === currentDay()) cls += " today";
+        html += `<div class="${cls}" data-day="${sched.day}" tabindex="0" aria-label="${sched.dateLabel}, Day ${sched.day}, ${pct}% complete" title="Day ${sched.day} · ${sched.title} · ${pct}%">
+          <div class="date-num">${day}</div>
+          <div class="day-label">D${sched.day}</div>
+        </div>`;
+      } else {
+        html += `<div class="cal-cell dim"><div class="date-num">${day}</div></div>`;
+      }
+    }
+    html += `</div></div>`;
+  });
+  return html;
+}
+
+function renderCharts(){
+  // Weekly jars: each week is a fixed-height jar; water fills with tasks done / total
+  const weeks = [1,2,3,4,5,6,7,8,"Taper"];
+  const weekStats = weeks.map(w => {
+    const days = SCHEDULE.filter(d => d.week === w);
+    let total = 0, done = 0;
+    days.forEach(d => d.slots.forEach((s, si) => s.tasks.forEach((t, ti) => {
+      total++;
+      if (isDone(`d${d.day}-s${si}-t${ti}`)) done++;
+    })));
+    return { w, total, done };
+  });
+  const jars = weekStats.map(s => {
+    const fill = s.total ? Math.round(s.done * 100 / s.total) : 0;
+    const fullCls = (s.total > 0 && s.done === s.total) ? "jar full" : "jar";
+    return `<div class="${fullCls}" title="W${s.w}: ${s.done}/${s.total} (${fill}%)">
+      <div class="water" style="height:${fill}%"></div>
+      <div class="v">${s.done}</div>
+      <div class="lbl">W${s.w}</div>
+    </div>`;
+  }).join("");
+
+  // DSA-by-difficulty pie
+  const dsaCounts = { E: grindDone("E"), M: grindDone("M"), H: grindDone("H") };
+  const total = dsaCounts.E + dsaCounts.M + dsaCounts.H || 1;
+  const slices = [
+    { label: "Easy",   v: dsaCounts.E, color: "#60a5fa" },
+    { label: "Medium", v: dsaCounts.M, color: "#fbbf24" },
+    { label: "Hard",   v: dsaCounts.H, color: "#f87171" }
+  ];
+  let cumulative = 0;
+  const segments = slices.map(s => {
+    const pct = s.v / total;
+    const start = cumulative;
+    cumulative += pct;
+    const end = cumulative;
+    return { ...s, start, end };
+  });
+  const pieSvg = `<svg class="pie" viewBox="-1 -1 2 2" aria-label="DSA solved by difficulty">
+    ${segments.map(s => {
+      if (s.v === 0) return "";
+      const a1 = s.start * Math.PI * 2 - Math.PI / 2;
+      const a2 = s.end * Math.PI * 2 - Math.PI / 2;
+      const large = (s.end - s.start) > 0.5 ? 1 : 0;
+      const x1 = Math.cos(a1), y1 = Math.sin(a1);
+      const x2 = Math.cos(a2), y2 = Math.sin(a2);
+      // Full circle hack: when there is exactly one slice at 100%, draw two halves.
+      if (s.start === 0 && s.end === 1){
+        return `<circle cx="0" cy="0" r="1" fill="${s.color}"/>`;
+      }
+      return `<path d="M 0 0 L ${x1} ${y1} A 1 1 0 ${large} 1 ${x2} ${y2} Z" fill="${s.color}"/>`;
+    }).join("")}
+    <circle class="pie-hole" cx="0" cy="0" r="0.55" />
+    <text class="pie-num"   x="0" y="0.06" text-anchor="middle">${total>0?total:0}</text>
+    <text class="pie-label" x="0" y="0.32" text-anchor="middle">solved</text>
+  </svg>`;
+  const legend = slices.map(s => `<div class="row"><span class="swatch" style="background:${s.color}"></span><span>${s.label} <b>${s.v}</b></span></div>`).join("");
+
+  return `<div class="charts">
+    <div class="chart-box"><h4>Weekly progress (jars filling)</h4><div class="jars">${jars}</div></div>
+    <div class="chart-box"><h4>DSA by difficulty</h4>${pieSvg}<div class="pie-legend">${legend}</div></div>
+  </div>`;
+}
+
+function dayPct(d){
+  let total = 0, done = 0;
+  d.slots.forEach((s, si) => s.tasks.forEach((t, ti) => {
+    total++;
+    if(isDone(`d${d.day}-s${si}-t${ti}`)) done++;
+  }));
+  return total ? Math.round(done * 100 / total) : 0;
+}
+
+function currentDay(){
+  // Calendar-based: which Day N corresponds to today's date?
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const start = new Date(START_DATE.getTime());
+  start.setHours(0,0,0,0);
+  const diffDays = Math.floor((today - start) / 86400000) + 1;
+  if (diffDays < 1) return 1;            // before start: highlight Day 1
+  if (diffDays > 60) return 60;           // after end: highlight Day 60
+  return diffDays;
+}
+
+function dayCompletedCount(){
+  return SCHEDULE.filter(d => dayPct(d) === 100).length;
+}
+
+function streak(){
+  // consecutive 100% days starting from day 1
+  let c = 0;
+  for (const d of SCHEDULE){
+    if (dayPct(d) === 100) c++;
+    else break;
+  }
+  return c;
+}
+
+function renderSchedule(filter){
+  // filter: "today" | "all" | "1".."8" | "Taper"
+  const cont = document.getElementById("view-schedule");
+  cont.innerHTML = "";
+
+  // Heatmap + quote always at top
+  cont.insertAdjacentHTML("beforeend", renderHeatmap());
+  const [q, who] = quoteOfDay();
+  cont.insertAdjacentHTML("beforeend", `<div class="quote">${q}<span class="who">— ${who}</span></div>`);
+
+  let lastWeek = null;
+  const todayDay = currentDay();
+  SCHEDULE.forEach(d => {
+    let visible = true;
+    let openByDefault = false;
+    if (filter === "today") {
+      visible = (d.day === todayDay) || (d.day === todayDay + 1);
+      openByDefault = (d.day === todayDay);
+    } else if (filter !== "all" && filter !== undefined) {
+      visible = String(d.week) === String(filter);
+      openByDefault = visible && (d.day === todayDay);
+    }
+    if (!visible) return;
+
+    if (d.week !== lastWeek) {
+      cont.insertAdjacentHTML("beforeend", phaseBanner(d.week));
+      lastWeek = d.week;
+    }
+    let totalTasks = 0, doneTasks = 0;
+    let bodyHTML = "";
+    d.slots.forEach((s, si) => {
+      let inner = "";
+      s.tasks.forEach((t, ti) => {
+        const id = `d${d.day}-s${si}-t${ti}`;
+        totalTasks++;
+        if (isDone(id)) doneTasks++;
+        inner += renderTaskHTML(id, t);
+      });
+      const timerKey = `d${d.day}-s${si}`;
+      const timerMin = parseInt(s.time, 10) || 0;
+      const timerHTML = timerMin > 0
+        ? `<button class="timer-btn" data-timer="${timerKey}" data-mins="${timerMin}">▶ ${timerMin}m</button>`
+        : "";
+      bodyHTML += `<div class="block"><div class="block-head"><b>${s.slot}</b>${s.time?` · ${s.time} min`:""}${timerHTML}</div><ul class="tasks">${inner}</ul></div>`;
+    });
+    const pct = totalTasks ? Math.round(doneTasks*100/totalTasks) : 0;
+    const completedCls = pct === 100 ? "completed" : "";
+    const open = openByDefault ? "open" : "";
+    const todayMarker = (d.day === todayDay) ? '<span style="color:var(--accent-3);font-weight:700;margin-left:6px">◀ TODAY</span>' : '';
+    cont.insertAdjacentHTML("beforeend",
+      `<div class="day ${open} ${completedCls}" data-day="${d.day}">
+         <div class="day-head">
+           <div><span class="day-num">DAY ${String(d.day).padStart(2,"0")}</span><span class="day-title">${d.dateLabel || (d.dow + " ·")} · ${d.title}${todayMarker}</span></div>
+           <div class="day-pct"><b>${doneTasks}</b>/${totalTasks} · ${pct}%</div>
+         </div>
+         <div class="day-body">${bodyHTML}</div>
+       </div>`);
+  });
+
+  wireScheduleInteractions(cont);
+}
+
+function wireScheduleInteractions(cont){
+  cont.querySelectorAll(".day-head").forEach(h => h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
+  cont.querySelectorAll(".cell, .cal-cell.has-day").forEach(c => c.addEventListener("click", () => {
+    const targetDay = c.dataset.day;
+    if (!targetDay) return;
+    document.querySelector(".tabs button[data-view='schedule']").click();
+    // ensure "all" view so the target day is rendered
+    setViewMode("all");
+    setTimeout(() => {
+      const el = document.querySelector(`.day[data-day='${targetDay}']`);
+      if (el){ el.classList.add("open"); el.scrollIntoView({behavior:"smooth", block:"center"}); }
+    }, 100);
+  }));
+  cont.querySelectorAll(".heatmap-tabs button").forEach(b => b.addEventListener("click", () => {
+    settings.heatmap = b.dataset.hm; saveSettings();
+    renderSchedule(activeFilter());
+  }));
+  cont.querySelectorAll("input[type=checkbox][data-id]").forEach(cb => {
+    cb.addEventListener("change", e => {
+      const dayEl = cb.closest(".day");
+      const wasComplete = dayEl.classList.contains("completed");
+      setDone(cb.dataset.id, cb.checked);
+      cb.parentElement.querySelector(".task-text").classList.toggle("done", cb.checked);
+      const all = dayEl.querySelectorAll("input[type=checkbox][data-id]");
+      const done = [...all].filter(c=>c.checked).length;
+      const pct = all.length ? Math.round(done*100/all.length) : 0;
+      dayEl.querySelector(".day-pct").innerHTML = `<b>${done}</b>/${all.length} · ${pct}%`;
+      const nowComplete = pct === 100;
+      dayEl.classList.toggle("completed", nowComplete);
+      if (nowComplete && !wasComplete){
+        celebrateDay(parseInt(dayEl.dataset.day, 10));
+        checkWeekCompletion(parseInt(dayEl.dataset.day, 10));
+      }
+    });
+    if(cb.checked) cb.parentElement.querySelector(".task-text").classList.add("done");
+  });
+  cont.querySelectorAll(".note-toggle").forEach(t => t.addEventListener("click", e => {
+    e.stopPropagation();
+    const id = t.dataset.noteid;
+    const li = t.closest("li");
+    const ta = li.querySelector(`textarea.note-input[data-noteid="${id}"]`);
+    const lbl = li.querySelector(`label[data-noteid="${id}"]`);
+    const isOpen = ta.style.display === "block";
+    ta.style.display = lbl.style.display = isOpen ? "none" : "block";
+    if (!isOpen) ta.focus();
+  }));
+  cont.querySelectorAll("textarea.note-input").forEach(ta => {
+    ta.addEventListener("input", () => {
+      const id = ta.dataset.noteid;
+      setNote(id, {text: ta.value});
+      const tog = ta.closest("li").querySelector(".note-toggle");
+      if (tog) tog.classList.toggle("has-note", !!ta.value || getNote(id).revisit);
+    });
+  });
+  cont.querySelectorAll(".note-revisit").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const id = cb.dataset.noteid;
+      const cur = getNote(id);
+      const ts = cur.timestamps || [];
+      if (cb.checked && ts.length === 0) ts.push(Date.now());
+      setNote(id, {revisit: cb.checked, timestamps: ts});
+      const tog = cb.closest("li").querySelector(".note-toggle");
+      if (tog){
+        tog.classList.toggle("has-note", cb.checked || !!cur.text);
+        tog.textContent = cb.checked ? "🔁" : (cur.text ? "📝" : "+");
+      }
+      toast(cb.checked ? "📝 Added to mistake log (3-day, 7-day, 21-day spaced rep)" : "Removed from mistake log");
+    });
+  });
+  cont.querySelectorAll(".timer-btn").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    startTimer(b);
+  }));
+}
+
+function refreshHeatmapCells(){
+  document.querySelectorAll(".cell, .cal-cell.has-day").forEach(cell => {
+    const day = parseInt(cell.dataset.day, 10);
+    const d = SCHEDULE.find(x => x.day === day);
+    if (!d) return;
+    const pct = dayPct(d);
+    cell.classList.remove("p25","p50","p75","p100");
+    if (pct === 100) cell.classList.add("p100");
+    else if (pct >= 75) cell.classList.add("p75");
+    else if (pct >= 50) cell.classList.add("p50");
+    else if (pct >= 25) cell.classList.add("p25");
+  });
+}
+
+function activeFilter(){
+  const wActive = document.querySelector("nav.weeks button.active");
+  if (wActive) return wActive.dataset.week;
+  return settings.mode || "today";
+}
+
+function checkWeekCompletion(dayNum){
+  const d = SCHEDULE.find(x => x.day === dayNum);
+  if (!d) return;
+  const weekDays = SCHEDULE.filter(x => x.week === d.week);
+  if (weekDays.every(x => dayPct(x) === 100)){
+    showWeekRecap(d.week, weekDays);
+  }
+}
+
+// ───── timer (countdown) ─────
+function startTimer(btn){
+  const key = btn.dataset.timer;
+  const mins = parseInt(btn.dataset.mins, 10);
+  if (timers[key]){
+    clearInterval(timers[key].intervalId);
+    delete timers[key];
+    btn.classList.remove("running");
+    btn.textContent = `▶ ${mins}m`;
+    return;
+  }
+  const endsAt = Date.now() + mins * 60 * 1000;
+  btn.classList.add("running");
+  const tick = () => {
+    const left = endsAt - Date.now();
+    if (left <= 0){
+      clearInterval(timers[key].intervalId);
+      delete timers[key];
+      btn.classList.remove("running"); btn.classList.add("done");
+      btn.textContent = "⏰ DONE";
+      ding();
+      toast("⏰ Time's up. Take a 5-min break.");
+      return;
+    }
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000).toString().padStart(2,"0");
+    btn.textContent = `⏸ ${m}:${s}`;
+  };
+  tick();
+  timers[key] = { endsAt, intervalId: setInterval(tick, 1000) };
+}
+function ding(){
+  if (!settings.sound) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880; g.gain.value = .3;
+    o.start(); o.stop(ctx.currentTime + 0.18);
+    setTimeout(() => {
+      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.frequency.value = 1320; g2.gain.value = .25;
+      o2.start(); o2.stop(ctx.currentTime + 0.22);
+    }, 220);
+  } catch(_){}
+}
+
+// ───── celebration: confetti + toast ─────
+function celebrateDay(dayNum){
+  const msgs = [
+    `🎉 Day ${dayNum} crushed! Streak: ${streak()} 🔥`,
+    `💪 Day ${dayNum} done. Keep stacking wins.`,
+    `⚡ Day ${dayNum} cleared. Compounding pays.`,
+    `🚀 Day ${dayNum} sealed. ${60 - dayCompletedCount()} to go.`,
+    `🏆 Day ${dayNum} closed. Future-you says thanks.`
+  ];
+  toast(msgs[Math.floor(Math.random()*msgs.length)]);
+  confetti();
+  ding();
+  if (dayCompletedCount() === 60){
+    setTimeout(() => { toast("🌟 60 DAYS COMPLETE. GO GET THE OFFER. 🌟"); confetti(true); }, 800);
+  }
+}
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+function confetti(epic){
+  const c = document.getElementById("confetti");
+  c.width = innerWidth; c.height = innerHeight;
+  const ctx = c.getContext("2d");
+  const colors = ["#ff9900","#146eb4","#4ade80","#c084fc","#fbbf24","#f87171","#60a5fa"];
+  const N = epic ? 260 : 120;
+  const parts = Array.from({length: N}, () => ({
+    x: Math.random()*c.width,
+    y: -20 - Math.random()*200,
+    vx: (Math.random()-0.5)*5,
+    vy: 3 + Math.random()*5,
+    r: 4 + Math.random()*5,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    rot: Math.random()*Math.PI,
+    vr: (Math.random()-0.5)*0.3
+  }));
+  let frames = 0, max = epic ? 220 : 140;
+  function step(){
+    frames++;
+    ctx.clearRect(0,0,c.width,c.height);
+    parts.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.r, -p.r/2, p.r*2, p.r);
+      ctx.restore();
+    });
+    if (frames < max) requestAnimationFrame(step);
+    else ctx.clearRect(0,0,c.width,c.height);
+  }
+  step();
+}
+
+// ====================================================================
+// ACHIEVEMENTS
+// ====================================================================
+const ACHIEVEMENTS = [
+  // streaks & days
+  { id:"first-day",   ico:"🎉", name:"First Step",       desc:"Complete Day 1",                 test: () => dayCompletedCount() >= 1 },
+  { id:"streak-7",    ico:"🔥", name:"Week One Done",    desc:"Complete 7 days in a row",       test: () => streak() >= 7 },
+  { id:"streak-14",   ico:"🔥", name:"Two-Week Hot",     desc:"Complete 14 days in a row",      test: () => streak() >= 14 },
+  { id:"streak-30",   ico:"🔥", name:"Half-Way Hero",    desc:"Complete 30 days in a row",      test: () => streak() >= 30 },
+  { id:"streak-60",   ico:"🏅", name:"60-Day Iron",      desc:"All 60 days complete",           test: () => dayCompletedCount() === 60 },
+  { id:"day-15",      ico:"💪", name:"Quarter Done",     desc:"15 days complete",               test: () => dayCompletedCount() >= 15 },
+  { id:"day-30",      ico:"⚔️", name:"Halfway",          desc:"30 days complete",               test: () => dayCompletedCount() >= 30 },
+  { id:"day-45",      ico:"🚀", name:"Final Stretch",    desc:"45 days complete",               test: () => dayCompletedCount() >= 45 },
+  // DSA
+  { id:"all-easy",    ico:"🟢", name:"Easy Master",      desc:"All 24 Grind Easies done",       test: () => grindDone("E") >= 24 },
+  { id:"med-50",      ico:"🟡", name:"Medium Climb",     desc:"50 Mediums done",                test: () => grindDone("M") >= 50 },
+  { id:"all-med",     ico:"🟡", name:"Medium Master",    desc:"All 109 Mediums done",           test: () => grindDone("M") >= 109 },
+  { id:"first-hard",  ico:"🔴", name:"Hard Beginnings",  desc:"First Hard solved",              test: () => grindDone("H") >= 1 },
+  { id:"hard-15",     ico:"🔴", name:"Hard Worker",      desc:"15 Hards done",                  test: () => grindDone("H") >= 15 },
+  { id:"all-hard",    ico:"🏆", name:"Hard Master",      desc:"All 36 Hards done",              test: () => grindDone("H") >= 36 },
+  { id:"grind-100",   ico:"💯", name:"Century",          desc:"100 Grind problems done",        test: () => grindDoneTotal() >= 100 },
+  { id:"grind-all",   ico:"👑", name:"Grind 169",        desc:"All 169 Grind problems done",    test: () => grindDoneTotal() >= 169 },
+  // SD / LP / projects / mocks
+  { id:"sd-5",        ico:"🏗",  name:"System Thinker",   desc:"5 SD designs written",           test: () => countByType("sd") >= 5 },
+  { id:"lp-6",        ico:"📖", name:"Story Time",       desc:"6 LP stories drafted",           test: () => countByType("lp") >= 6 },
+  { id:"lp-12",       ico:"🎤", name:"LP Locked",        desc:"12 LP stories drafted/refined",  test: () => countByType("lp") >= 12 },
+  { id:"first-mock",  ico:"🎙",  name:"First Mock",       desc:"First mock interview done",      test: () => countByType("mk") >= 1 },
+  { id:"mock-5",      ico:"🎙",  name:"Mock Veteran",     desc:"5 mocks complete",               test: () => countByType("mk") >= 5 },
+  { id:"first-lab",   ico:"🐧", name:"Linux Whisperer",  desc:"First SadServers/Bandit done",   test: () => countByType("lab") >= 1 },
+  { id:"lab-5",       ico:"🐧", name:"Ops Mindset",      desc:"5 labs done",                    test: () => countByType("lab") >= 5 },
+  { id:"proj-1",      ico:"🛠",  name:"Ship It #1",       desc:"Project 1 fully complete",       test: () => projectDone(1) },
+  { id:"proj-2",      ico:"🛠",  name:"Ship It #2",       desc:"Project 2 fully complete",       test: () => projectDone(2) }
+];
+
+function grindDone(diff){
+  let n = 0;
+  SCHEDULE.forEach(d => d.slots.forEach((s,si) => s.tasks.forEach((t,ti) => {
+    if (t.type === "dsa" && isDone(`d${d.day}-s${si}-t${ti}`)){
+      t.names.forEach(name => {
+        const meta = DSA[name];
+        if (meta && meta[1] === diff) n++;
+      });
+    }
+  })));
+  return n;
+}
+function grindDoneTotal(){
+  let n = 0;
+  SCHEDULE.forEach(d => d.slots.forEach((s,si) => s.tasks.forEach((t,ti) => {
+    if (t.type === "dsa" && isDone(`d${d.day}-s${si}-t${ti}`)) n += (t.names||[]).length;
+  })));
+  return n;
+}
+function countByType(type){
+  let n = 0;
+  SCHEDULE.forEach(d => d.slots.forEach((s,si) => s.tasks.forEach((t,ti) => {
+    if (t.type === type && isDone(`d${d.day}-s${si}-t${ti}`)) n++;
+  })));
+  return n;
+}
+function projectDone(num){
+  // Project 1 spans days 13–28; Project 2 spans days 34–42 by our tracker
+  const range = num === 1 ? [13,28] : [34,42];
+  let allBe = 0, doneBe = 0;
+  SCHEDULE.forEach(d => {
+    if (d.day < range[0] || d.day > range[1]) return;
+    d.slots.forEach((s, si) => s.tasks.forEach((t, ti) => {
+      if (t.type === "be"){
+        allBe++;
+        if (isDone(`d${d.day}-s${si}-t${ti}`)) doneBe++;
+      }
+    }));
+  });
+  return allBe > 0 && allBe === doneBe;
+}
+
+// remember earned achievements to fire toast only once
+const ACHV_KEY = "amzn-tracker-achv-v1";
+const achvState = JSON.parse(localStorage.getItem(ACHV_KEY) || "{}");
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a => {
+    if (a.test() && !achvState[a.id]){
+      achvState[a.id] = Date.now();
+      localStorage.setItem(ACHV_KEY, JSON.stringify(achvState));
+      toast(`🏆 Achievement: ${a.name}`);
+      confetti();
+    }
+  });
+}
+
+function renderAchievements(){
+  const cont = document.getElementById("view-achievements");
+  const earned = ACHIEVEMENTS.filter(a => a.test()).length;
+  let html = `<div class="panel"><h2>🏆 Achievements · ${earned}/${ACHIEVEMENTS.length}</h2>
+    <div class="achievements-grid">`;
+  ACHIEVEMENTS.forEach(a => {
+    const ok = a.test();
+    html += `<div class="achv ${ok?'earned':''}">
+      <div class="ico">${a.ico}</div>
+      <div class="name">${a.name}</div>
+      <div class="desc">${a.desc}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+  cont.innerHTML = html;
+}
+
+// ====================================================================
+// MISTAKE LOG (spaced repetition: 3, 7, 21 days)
+// ====================================================================
+function buildMistakeLog(){
+  const items = [];
+  Object.entries(notes).forEach(([id, n]) => {
+    if (!n.revisit) return;
+    // find task name
+    const m = id.match(/^d(\d+)-s(\d+)-t(\d+)$/);
+    if (!m) return;
+    const day = parseInt(m[1],10), si = parseInt(m[2],10), ti = parseInt(m[3],10);
+    const d = SCHEDULE.find(x => x.day === day);
+    if (!d) return;
+    const t = d.slots[si]?.tasks[ti];
+    if (!t) return;
+    const ts = (n.timestamps && n.timestamps[0]) || Date.now();
+    const ageDays = (Date.now() - ts) / 86400000;
+    const dueAt = (() => {
+      // compute next due based on intervals 3, 7, 21
+      if (ageDays < 3) return 3 - ageDays;
+      if (ageDays < 7) return 7 - ageDays;
+      if (ageDays < 21) return 21 - ageDays;
+      return 0;
+    })();
+    const label = t.names ? t.names.join(", ") : (t.text || "(task)");
+    items.push({ id, day, label, type: t.type, note: n.text || "", ts, dueAt, ageDays });
+  });
+  // sort: overdue first
+  items.sort((a,b) => a.dueAt - b.dueAt);
+  return items;
+}
+
+function renderMistakes(){
+  const cont = document.getElementById("view-mistakes");
+  const items = buildMistakeLog();
+  let html = `<div class="panel"><h2>📝 Mistake Log · ${items.length} item${items.length===1?'':'s'}</h2>
+    <p style="color:var(--muted);font-size:12px;margin-top:0">Spaced repetition: re-solve at <b>3-day</b>, <b>7-day</b>, <b>21-day</b> intervals. Mark a task with 🔁 in the schedule to add it here.</p>`;
+  if (items.length === 0){
+    html += `<div style="text-align:center;padding:30px;color:var(--muted)">No mistakes logged yet. When a problem stumps you, click the <b>+</b> on its task and check "mark for revisit".</div>`;
+  } else {
+    items.forEach(i => {
+      const dueClass = i.dueAt === 0 ? "overdue" : (i.dueAt < 1 ? "upcoming" : "future");
+      const dueLabel = i.dueAt === 0 ? "DUE NOW" : (i.dueAt < 1 ? "Today" : `in ${Math.ceil(i.dueAt)}d`);
+      html += `<div class="mistake-row">
+        <div class="due ${dueClass}">${dueLabel}</div>
+        <div class="body">
+          <div class="name">${i.label} <span style="color:var(--muted);font-size:11px">· Day ${i.day} · ${i.type.toUpperCase()}</span></div>
+          ${i.note ? `<div class="note">${i.note}</div>` : ""}
+        </div>
+        <div class="actions">
+          <button data-jump="${i.id}">↗ Jump</button>
+          <button data-resolve="${i.id}">✓ Resolved</button>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  cont.innerHTML = html;
+  cont.querySelectorAll("[data-jump]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.jump;
+    const m = id.match(/^d(\d+)-/);
+    if (!m) return;
+    const day = parseInt(m[1], 10);
+    document.querySelector(".tabs button[data-view='schedule']").click();
+    setViewMode("all");
+    setTimeout(() => {
+      const el = document.querySelector(`.day[data-day='${day}']`);
+      if (el){ el.classList.add("open"); el.scrollIntoView({behavior:"smooth", block:"center"}); }
+    }, 100);
+  }));
+  cont.querySelectorAll("[data-resolve]").forEach(b => b.addEventListener("click", () => {
+    const id = b.dataset.resolve;
+    setNote(id, {revisit: false});
+    renderMistakes();
+    toast("✓ Resolved · removed from mistake log");
+  }));
+}
+
+// ====================================================================
+// WEEKLY RECAP
+// ====================================================================
+function showWeekRecap(week, weekDays){
+  let dsaCount = 0, mockCount = 0, sdCount = 0, lpCount = 0, beCount = 0, labCount = 0;
+  weekDays.forEach(d => d.slots.forEach((s, si) => s.tasks.forEach((t, ti) => {
+    if (!isDone(`d${d.day}-s${si}-t${ti}`)) return;
+    if (t.type === "dsa") dsaCount += (t.names||[]).length;
+    else if (t.type === "mk") mockCount++;
+    else if (t.type === "sd") sdCount++;
+    else if (t.type === "lp") lpCount++;
+    else if (t.type === "be") beCount++;
+    else if (t.type === "lab") labCount++;
+  })));
+  const nextWeek = SCHEDULE.find(x => x.week !== week && x.day > weekDays[weekDays.length-1].day);
+  const nextLabel = nextWeek ? `Week ${nextWeek.week}` : "Taper";
+  showModal(`
+    <button class="close" onclick="closeModal()">✕</button>
+    <h2>🏁 Week ${week} complete!</h2>
+    <p style="color:var(--muted)">Here's what you stacked this week.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0">
+      <div class="achv earned"><div class="ico">🧮</div><div class="name">${dsaCount}</div><div class="desc">DSA problems</div></div>
+      <div class="achv earned"><div class="ico">🏗</div><div class="name">${sdCount}</div><div class="desc">SD designs</div></div>
+      <div class="achv earned"><div class="ico">📖</div><div class="name">${lpCount}</div><div class="desc">LP stories</div></div>
+      <div class="achv earned"><div class="ico">🛠</div><div class="name">${beCount}</div><div class="desc">Backend tasks</div></div>
+      <div class="achv earned"><div class="ico">🎙</div><div class="name">${mockCount}</div><div class="desc">Mocks</div></div>
+      <div class="achv earned"><div class="ico">🐧</div><div class="name">${labCount}</div><div class="desc">Labs</div></div>
+    </div>
+    <p style="margin-top:16px"><b>Streak:</b> 🔥 ${streak()} days · <b>Total complete:</b> ${dayCompletedCount()}/60</p>
+    <p style="margin-top:6px">Up next: <b style="color:var(--accent)">${nextLabel}</b>. Rest tonight, hit the ground hard tomorrow.</p>
+    <button class="icon primary" style="margin-top:12px;width:100%" onclick="closeModal()">Onwards →</button>
+  `);
+  confetti(true);
+}
+
+function showModal(html){
+  document.getElementById("modal").innerHTML = html;
+  document.getElementById("modal-bg").classList.add("show");
+}
+function closeModal(){
+  document.getElementById("modal-bg").classList.remove("show");
+}
+document.getElementById("modal-bg").addEventListener("click", e => {
+  if (e.target.id === "modal-bg") closeModal();
+});
+window.closeModal = closeModal;
+
+// ====================================================================
+// SEARCH
+// ====================================================================
+function buildSearchIndex(){
+  const idx = [];
+  SCHEDULE.forEach(d => {
+    d.slots.forEach((s, si) => s.tasks.forEach((t, ti) => {
+      const id = `d${d.day}-s${si}-t${ti}`;
+      let label = "";
+      if (t.type === "dsa") label = (t.names||[]).join(", ");
+      else if (t.type === "rev") label = t.text;
+      else label = t.text || "";
+      idx.push({ day: d.day, week: d.week, dayTitle: d.title, slot: s.slot, type: t.type, label, id });
+    }));
+  });
+  return idx;
+}
+const searchIndex = buildSearchIndex();
+function doSearch(q){
+  const lo = q.toLowerCase().trim();
+  if (lo.length < 2) return [];
+  return searchIndex.filter(i =>
+    i.label.toLowerCase().includes(lo) ||
+    i.dayTitle.toLowerCase().includes(lo) ||
+    String(i.day).includes(lo) ||
+    i.type.toLowerCase().includes(lo)
+  ).slice(0, 30);
+}
+
+const searchEl = document.getElementById("search");
+const searchResultsEl = document.getElementById("search-results");
+searchEl.addEventListener("input", () => {
+  const hits = doSearch(searchEl.value);
+  if (hits.length === 0){ searchResultsEl.classList.remove("show"); return; }
+  searchResultsEl.innerHTML = hits.map(h =>
+    `<div class="hit" data-day="${h.day}" data-id="${h.id}">
+      <div>${h.label}</div>
+      <div class="meta">Day ${h.day} · ${h.dayTitle} · ${h.slot} · ${h.type.toUpperCase()}</div>
+    </div>`).join("");
+  searchResultsEl.classList.add("show");
+  searchResultsEl.querySelectorAll(".hit").forEach(el => el.addEventListener("click", () => {
+    const day = el.dataset.day;
+    document.querySelector(".tabs button[data-view='schedule']").click();
+    setViewMode("all");
+    setTimeout(() => {
+      const dayEl = document.querySelector(`.day[data-day='${day}']`);
+      if (dayEl){ dayEl.classList.add("open"); dayEl.scrollIntoView({behavior:"smooth", block:"center"}); }
+      searchResultsEl.classList.remove("show");
+      searchEl.value = "";
+    }, 100);
+  }));
+});
+document.addEventListener("click", e => {
+  if (!searchEl.contains(e.target) && !searchResultsEl.contains(e.target)){
+    searchResultsEl.classList.remove("show");
+  }
+});
+
+// ====================================================================
+// RESUME (next unfinished task)
+// ====================================================================
+document.getElementById("resume").addEventListener("click", () => {
+  for (const d of SCHEDULE){
+    for (let si = 0; si < d.slots.length; si++){
+      for (let ti = 0; ti < d.slots[si].tasks.length; ti++){
+        const id = `d${d.day}-s${si}-t${ti}`;
+        if (!isDone(id)){
+          document.querySelector(".tabs button[data-view='schedule']").click();
+          setViewMode("all");
+          setTimeout(() => {
+            const dayEl = document.querySelector(`.day[data-day='${d.day}']`);
+            if (dayEl){
+              dayEl.classList.add("open");
+              dayEl.scrollIntoView({behavior:"smooth", block:"center"});
+              dayEl.style.transition = "box-shadow .3s";
+              dayEl.style.boxShadow = "0 0 0 3px var(--accent)";
+              setTimeout(() => dayEl.style.boxShadow = "", 1500);
+            }
+          }, 100);
+          toast(`📍 Resume on Day ${d.day} · ${d.title}`);
+          return;
+        }
+      }
+    }
+  }
+  toast("🎉 Nothing left to do — you're done with all 60 days!");
+});
+
+// ====================================================================
+// THEME TOGGLE / SOUND / PRINT / EXPORT / IMPORT / PROFILE
+// ====================================================================
+const THEMES = ["dark", "light", "hc"];
+const THEME_LABEL = { dark: "🌑 Dark", light: "☀️ Light", hc: "🔆 High contrast" };
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  const i = THEMES.indexOf(settings.theme);
+  settings.theme = THEMES[(i + 1) % THEMES.length];
+  saveSettings(); applyTheme();
+  toast(THEME_LABEL[settings.theme]);
+});
+const soundBtn = document.getElementById("sound-toggle");
+function refreshSoundBtn(){ soundBtn.textContent = settings.sound ? "🔊" : "🔇"; soundBtn.title = settings.sound ? "Sound on" : "Sound off"; }
+refreshSoundBtn();
+soundBtn.addEventListener("click", () => {
+  settings.sound = !settings.sound; saveSettings(); refreshSoundBtn();
+  toast(settings.sound ? "🔊 Sound on" : "🔇 Sound off");
+});
+document.getElementById("print-btn").addEventListener("click", () => {
+  // Expand all days so print shows everything
+  document.querySelectorAll(".day").forEach(d => d.classList.add("open"));
+  setTimeout(() => window.print(), 100);
+});
+const profileEl = document.getElementById("profile-name");
+profileEl.value = settings.name || "";
+profileEl.addEventListener("input", () => { settings.name = profileEl.value; saveSettings(); });
+document.getElementById("export-btn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({state, notes, achvState, settings}, null, 2)], {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `amazon-tracker-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("⬇ Progress exported");
+});
+document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+document.getElementById("import-file").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.state) Object.assign(state, data.state);
+      if (data.notes) Object.assign(notes, data.notes);
+      if (data.achvState) Object.assign(achvState, data.achvState);
+      if (data.settings) Object.assign(settings, data.settings);
+      save(); saveNotes(); saveSettings();
+      localStorage.setItem(ACHV_KEY, JSON.stringify(achvState));
+      applyTheme();
+      renderSchedule(settings.mode);
+      updateStats();
+      toast("⬆ Progress imported");
+    } catch(err){
+      toast("❌ Invalid JSON file");
+    }
+  };
+  reader.readAsText(f);
+});
+
+// ====================================================================
+// VIEW MODE (today / all)
+// ====================================================================
+function setViewMode(mode){
+  settings.mode = mode; saveSettings();
+  document.querySelectorAll(".view-mode button").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+  document.querySelectorAll("nav.weeks button").forEach(b => b.classList.remove("active"));
+  renderSchedule(mode);
+}
+document.querySelectorAll(".view-mode button").forEach(b => b.addEventListener("click", () => setViewMode(b.dataset.mode)));
+
+// ====================================================================
+// KEYBOARD SHORTCUTS
+// ====================================================================
+document.addEventListener("keydown", e => {
+  // Skip when typing in inputs
+  if (["INPUT","TEXTAREA"].includes(e.target.tagName)) return;
+  if (e.key === "/") { e.preventDefault(); searchEl.focus(); }
+  else if (e.key === "?") {
+    e.preventDefault();
+    showModal(`
+      <button class="close" onclick="closeModal()">✕</button>
+      <h2>⌨️ Keyboard Shortcuts</h2>
+      <table style="width:100%;font-size:14px;line-height:2">
+        <tr><td><span class="kbd">/</span></td><td>Focus search</td></tr>
+        <tr><td><span class="kbd">j</span> / <span class="kbd">k</span></td><td>Next / previous day</td></tr>
+        <tr><td><span class="kbd">o</span></td><td>Open / collapse current day</td></tr>
+        <tr><td><span class="kbd">Space</span></td><td>Check off next unchecked task in visible day</td></tr>
+        <tr><td><span class="kbd">r</span></td><td>Resume (next unfinished task)</td></tr>
+        <tr><td><span class="kbd">t</span></td><td>Cycle theme: dark → light → high-contrast</td></tr>
+        <tr><td><span class="kbd">1</span>–<span class="kbd">8</span></td><td>Jump to week 1–8</td></tr>
+        <tr><td><span class="kbd">a</span></td><td>All weeks view</td></tr>
+        <tr><td><span class="kbd">d</span></td><td>Today view</td></tr>
+        <tr><td><span class="kbd">?</span></td><td>This help</td></tr>
+        <tr><td><span class="kbd">Esc</span></td><td>Close modal</td></tr>
+      </table>
+    `);
+  }
+  else if (e.key === "Escape") closeModal();
+  else if (e.key === "j" || e.key === "k") {
+    e.preventDefault();
+    const days = [...document.querySelectorAll(".day")];
+    if (days.length === 0) return;
+    const cur = days.findIndex(d => {
+      const r = d.getBoundingClientRect();
+      return r.top > 80 && r.top < innerHeight/2;
+    });
+    const nextIdx = e.key === "j" ? Math.min(cur+1, days.length-1) : Math.max(cur-1, 0);
+    const target = days[nextIdx >= 0 ? nextIdx : 0];
+    target.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+  else if (e.key === "o") {
+    const focusedDay = [...document.querySelectorAll(".day")].find(d => {
+      const r = d.getBoundingClientRect();
+      return r.top > 80 && r.top < innerHeight/2;
+    });
+    if (focusedDay) focusedDay.classList.toggle("open");
+  }
+  else if (e.key === " ") {
+    // toggle the first unchecked task in the topmost visible expanded day
+    const day = [...document.querySelectorAll(".day.open")].find(d => {
+      const r = d.getBoundingClientRect();
+      return r.top > 60 && r.top < innerHeight - 60;
+    });
+    if (day){
+      e.preventDefault();
+      const next = day.querySelector("input[type=checkbox][data-id]:not(:checked)");
+      if (next){ next.checked = true; next.dispatchEvent(new Event("change")); }
+    }
+  }
+  else if (e.key === "r") document.getElementById("resume").click();
+  else if (e.key === "t") document.getElementById("theme-toggle").click();
+  else if (e.key === "a") setViewMode("all");
+  else if (e.key === "d") setViewMode("today");
+  else if (/^[1-8]$/.test(e.key)) {
+    const btn = [...document.querySelectorAll("nav.weeks button")].find(b => b.dataset.week === e.key);
+    if (btn) btn.click();
+  }
+});
+
+function renderResources(){
+  const cont = document.getElementById("view-resources");
+  let html = `<div class="panel"><h2>Resources</h2><div class="grid-2">`;
+  Object.entries(RESOURCES).forEach(([cat, items]) => {
+    html += `<div><h3>${cat}</h3><ul>`;
+    items.forEach(([n,u]) => html += `<li><a href="${u}" target="_blank" rel="noopener">${n}</a></li>`);
+    html += `</ul></div>`;
+  });
+  html += `</div></div>`;
+  cont.innerHTML = html;
+}
+
+function renderGrind(){
+  const cont = document.getElementById("view-grind");
+  // group by topic
+  const groups = {};
+  Object.entries(DSA).forEach(([name, [slug, diff, prem]]) => {
+    // crude topic from order in this object isn't reliable; use a manual map
+  });
+  // Better: list everything alphabetically with diff badges, plus a topic legend
+  const rows = Object.entries(DSA)
+    .sort((a,b) => {
+      const order = {E:0,M:1,H:2};
+      return order[a[1][1]] - order[b[1][1]] || a[0].localeCompare(b[0]);
+    })
+    .map(([n, [slug, diff, prem]]) => {
+      const id = `grind-${slug}`;
+      const checked = isDone(id) ? "checked" : "";
+      const cls = prem ? "b-P" : "b-"+diff;
+      const lbl = prem ? `${diff}·P` : diff;
+      return `<li><input type=checkbox ${checked} data-id="${id}"><span class="task-text"><a href="${LC(slug)}" target="_blank" rel="noopener">${n}</a><span class="badge ${cls}">${lbl}</span></span></li>`;
+    }).join("");
+  cont.innerHTML = `<div class="panel"><h2>Grind 169 · Quick Index</h2>
+    <div class="stats" style="margin-bottom:10px">
+      <span>Click any problem to open on LeetCode</span>
+      <span><span class="badge b-E">E</span>Easy</span>
+      <span><span class="badge b-M">M</span>Medium</span>
+      <span><span class="badge b-H">H</span>Hard</span>
+      <span><span class="badge b-P">P</span>Premium</span>
+    </div>
+    <ul class="tasks">${rows}</ul></div>`;
+  cont.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    cb.addEventListener("change", () => {
+      setDone(cb.dataset.id, cb.checked);
+      cb.parentElement.querySelector(".task-text").classList.toggle("done", cb.checked);
+    });
+    if(cb.checked) cb.parentElement.querySelector(".task-text").classList.add("done");
+  });
+}
+
+function renderLP(){
+  const cont = document.getElementById("view-lp");
+  let html = `<div class="panel"><h2>Leadership Principles · SDE / Sys-Dev Playbook</h2>
+    <p class="seeds">Top 6 LPs · 12 stories · ≤ 2 min each · STAR with metric + lesson.</p>`;
+  LP_DATA.forEach(lp => {
+    html += `<div class="lp-card">
+      <h4>${lp.name}</h4>
+      <details><summary>What interviewers probe</summary><ul>${lp.probe.map(p=>`<li>${p}</li>`).join("")}</ul></details>
+      <details><summary>Brainstorm seeds (pick strongest)</summary><ul>${lp.seeds.map(p=>`<li>${p}</li>`).join("")}</ul></details>
+      <details><summary>Red flags to avoid</summary><ul class="red">${lp.red.map(p=>`<li>${p}</li>`).join("")}</ul></details>
+    </div>`;
+  });
+  html += `<h3>LP Story Matrix · 12 target stories</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
+      <thead><tr style="text-align:left;color:var(--muted);border-bottom:1px solid var(--line)"><th style="padding:6px 4px">#</th><th style="padding:6px 4px">Story type</th><th style="padding:6px 4px">Primary LP</th><th style="padding:6px 4px">Secondary LP</th></tr></thead>
+      <tbody>${LP_MATRIX.map((r,i)=>`<tr style="border-bottom:1px dashed var(--line)"><td style="padding:6px 4px;color:var(--muted)">${i+1}</td><td style="padding:6px 4px">${r[0]}</td><td style="padding:6px 4px;color:var(--ok)"><b>${r[1]}</b></td><td style="padding:6px 4px;color:var(--muted)">${r[2]}</td></tr>`).join("")}</tbody>
+    </table>`;
+  html += `</div>`;
+  cont.innerHTML = html;
+}
+
+function updateStats(){
+  let total=0, done=0;
+  const counts = {DSA:0, SD:0, LP:0, BE:0, MK:0, LAB:0};
+  SCHEDULE.forEach(d => {
+    d.slots.forEach((s, si) => {
+      s.tasks.forEach((t, ti) => {
+        const id = `d${d.day}-s${si}-t${ti}`;
+        total++;
+        if(isDone(id)){
+          done++;
+          if(t.type === "dsa") counts.DSA += (t.names||[]).length;
+          else if(t.type === "sd") counts.SD++;
+          else if(t.type === "lp") counts.LP++;
+          else if(t.type === "be") counts.BE++;
+          else if(t.type === "mk") counts.MK++;
+          else if(t.type === "lab") counts.LAB++;
+        }
+      });
+    });
+  });
+  document.getElementById("done").textContent = done;
+  document.getElementById("total").textContent = total;
+  document.getElementById("bar").style.width = (total ? (done/total*100) : 0) + "%";
+  document.getElementById("s-dsa").textContent = counts.DSA;
+  document.getElementById("s-sd").textContent = counts.SD;
+  document.getElementById("s-lp").textContent = counts.LP;
+  document.getElementById("s-be").textContent = counts.BE;
+  document.getElementById("s-mk").textContent = counts.MK;
+  document.getElementById("s-lab").textContent = counts.LAB;
+  document.getElementById("streak").textContent = streak();
+  document.getElementById("day-completed").textContent = dayCompletedCount();
+  // level: 1 XP per task done; level up every 25 XP
+  const xp = done;
+  const level = Math.floor(xp / 25) + 1;
+  document.getElementById("xp").textContent = xp;
+  document.getElementById("level").textContent = level;
+  checkAchievements();
+}
+
+// ---- nav wiring ----
+const weeksNav = document.getElementById("weeks");
+const weeks = [1,2,3,4,5,6,7,8,"Taper"];
+weeks.forEach(w => {
+  const b = document.createElement("button");
+  b.textContent = w === "Taper" ? "Taper" : `W${w}`;
+  b.dataset.week = w;
+  b.addEventListener("click", () => {
+    weeksNav.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.querySelectorAll(".view-mode button").forEach(x=>x.classList.remove("active"));
+    renderSchedule(w);
+  });
+  weeksNav.appendChild(b);
+});
+
+document.querySelectorAll(".tabs button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");
+    const v = btn.dataset.view;
+    ["schedule","resources","grind","lp","achievements","mistakes"].forEach(id => {
+      document.getElementById("view-"+id).classList.toggle("hidden", id !== v);
+    });
+    if(v === "resources") renderResources();
+    if(v === "grind") renderGrind();
+    if(v === "lp") renderLP();
+    if(v === "achievements") renderAchievements();
+    if(v === "mistakes") renderMistakes();
+  });
+});
+
+// initial render — respect saved view mode
+setViewMode(settings.mode || "today");
+updateStats();
+</script>
+</body>
+</html>
