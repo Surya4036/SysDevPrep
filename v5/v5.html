@@ -169,33 +169,51 @@
     background: linear-gradient(180deg, transparent, rgba(255,153,0,.04));
     border-radius: 10px;
   }
-  .journey-track {
-    position: relative; height: 8px;
-    background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 14px);
-    border-radius: 4px; margin: 10px 6px;
+  .journey-svg-wrap {
+    position: relative; width: 100%;
+    height: 220px;
+    margin: 14px 0 8px;
   }
-  .journey-fill {
-    position: absolute; left: 0; top: 0; bottom: 0;
-    background: linear-gradient(90deg, var(--ok), var(--accent));
-    border-radius: 4px; transition: width .8s cubic-bezier(.22,1,.36,1);
-    box-shadow: 0 0 12px rgba(255,153,0,.5);
+  .journey-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .journey-road-bg { fill: none; stroke: var(--line); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 4 8; }
+  .journey-road-fill { fill: none; stroke: url(#journeyGrad); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.22,1,.36,1); filter: drop-shadow(0 0 8px rgba(255,153,0,.45)); }
+  .journey-cp-dot { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; transition: all .3s; cursor: pointer; }
+  .journey-cp-dot.earned { fill: var(--ok); stroke: var(--ok); filter: drop-shadow(0 0 6px rgba(74,222,128,.6)); }
+  .journey-cp-dot:hover { stroke: var(--accent); stroke-width: 3; }
+  .journey-cp-icon { font-size: 14px; pointer-events: none; user-select: none; transition: transform .3s; }
+  .journey-cp-icon.earned { font-size: 16px; }
+  .journey-cp-label { font-size: 9px; fill: var(--muted); text-anchor: middle; pointer-events: none; font-weight: 600; }
+  .journey-cp-label.earned { fill: var(--ok); }
+  .journey-week-marker { font-size: 10px; fill: var(--accent); text-anchor: middle; font-weight: 700; pointer-events: none; }
+  .journey-week-tick { stroke: var(--accent); stroke-width: 1.5; opacity: .5; }
+  .journey-vehicle-svg {
+    font-size: 26px;
+    transition: all .8s cubic-bezier(.22,1,.36,1);
+    filter: drop-shadow(0 4px 6px rgba(255,153,0,.5));
+    pointer-events: none;
+    user-select: none;
   }
-  .journey-vehicle {
-    position: absolute; top: -22px; transform: translateX(-50%);
-    font-size: 26px; line-height: 1; transition: left .8s cubic-bezier(.22,1,.36,1);
-    z-index: 3; filter: drop-shadow(0 4px 6px rgba(255,153,0,.5));
-  }
-  .journey-flag {
-    position: absolute; right: -10px; top: -16px; font-size: 18px; z-index: 2;
-  }
-  .journey-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 12px; padding: 0 6px; }
+  .journey-flag-svg { font-size: 22px; pointer-events: none; }
+  .journey-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 8px; padding: 0 6px; }
   .journey-meta b { color: var(--accent); }
-  .journey-checkpoints { position: relative; margin-top: 8px; padding: 0 6px; height: 12px; }
-  .journey-cp { position: absolute; transform: translateX(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
-  .journey-cp::before { content: "•"; color: var(--accent-3); font-size: 14px; vertical-align: -2px; margin-right: 3px; }
   .journey-tier { padding: 6px 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 99px; font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
   .journey-tier b { color: var(--accent); }
   .journey-tier .vehicle-emoji { font-size: 18px; }
+  .journey-cp-tooltip {
+    position: absolute; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 10px; font-size: 11px; pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4); z-index: 5; opacity: 0;
+    transition: opacity .15s; max-width: 180px; line-height: 1.4;
+    transform: translate(-50%, -100%); margin-top: -8px;
+  }
+  .journey-cp-tooltip.show { opacity: 1; }
+  .journey-cp-tooltip b { color: var(--accent); display: block; margin-bottom: 2px; }
+  .journey-cp-tooltip .desc { color: var(--muted); }
+  .journey-cp-tooltip .status { color: var(--ok); font-weight: 700; margin-top: 4px; }
+  .journey-cp-tooltip .status.locked { color: var(--muted); }
+  @media (max-width: 720px) {
+    .journey-svg-wrap { height: 280px; }
+  }
 
   .grid-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 16px; }
   .grid-wrap h3 { margin: 0 0 10px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
@@ -780,6 +798,111 @@
   .lx-scenario b.title { color: var(--hard); }
   .lx-probe { background: rgba(192,132,252,.08); border-left: 3px solid var(--accent-3); padding: 10px 14px; border-radius: 4px; font-size: 13px; line-height: 1.55; }
 
+  /* ───── pomodoro mode (focus card) ───── */
+  .pomo-state { text-align: center; font-size: 14px; font-weight: 700; margin: 6px 0 0; letter-spacing: .03em; }
+  .pomo-state.work { color: var(--hard); }
+  .pomo-state.brk  { color: var(--easy); }
+  .pomo-state.lbrk { color: var(--ok); }
+  .pomo-dots { display: flex; gap: 8px; justify-content: center; margin: 8px 0 6px; }
+  .pomo-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); background: transparent; transition: all .25s; }
+  .pomo-dot.filled { background: var(--hard); border-color: var(--hard); box-shadow: 0 0 8px rgba(248,113,113,.5); }
+  .pomo-dot.current { border-color: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+  .pomo-break-msg {
+    text-align: center; padding: 14px 18px; margin: 14px 0;
+    background: rgba(96,165,250,.07); border: 1px solid rgba(96,165,250,.3);
+    border-radius: 8px; color: var(--easy); font-size: 14px; line-height: 1.5;
+  }
+  .pomo-break-msg b { color: var(--easy); }
+  .focus-card .tasks-list.dimmed { opacity: .35; pointer-events: none; transition: opacity .3s; }
+  .focus-controls button.pomo-toggle.on { color: var(--hard); border-color: var(--hard); background: rgba(248,113,113,.08); }
+
+  /* ───── first-run tip banner ───── */
+  .first-run-tip {
+    background: linear-gradient(135deg, rgba(192,132,252,.08), rgba(20,110,180,.08));
+    border: 1px solid rgba(192,132,252,.35); border-left: 4px solid var(--accent-3);
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 14px;
+    position: relative; font-size: 13px; line-height: 1.55;
+  }
+  .first-run-tip b { color: var(--accent-3); }
+  .first-run-tip .kbd { background: var(--panel-2); }
+  .first-run-tip .dismiss {
+    position: absolute; top: 10px; right: 12px;
+    background: transparent; border: 0; color: var(--muted); cursor: pointer;
+    font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 4px;
+  }
+  .first-run-tip .dismiss:hover { color: var(--accent); background: var(--panel-2); }
+
+  /* ───── empty-state cards ───── */
+  .empty-state {
+    text-align: center; padding: 30px 24px; max-width: 520px; margin: 12px auto;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .empty-state .ico { font-size: 38px; margin-bottom: 8px; }
+  .empty-state h3 { margin: 0 0 8px; color: var(--accent); font-size: 16px; }
+  .empty-state p { margin: 6px 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+  .empty-state .example {
+    background: var(--bg-2); border: 1px dashed var(--line); border-radius: 6px;
+    padding: 8px 12px; margin: 10px 0; font-size: 12px; color: var(--fg);
+  }
+  .empty-state .example code { background: var(--bg); padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, monospace; color: var(--accent-3); }
+  .empty-state details { text-align: left; margin-top: 10px; }
+  .empty-state details summary { color: var(--accent-2); cursor: pointer; font-weight: 600; font-size: 12px; }
+  .empty-state details summary:hover { color: var(--accent); }
+  .empty-state details > div { margin-top: 8px; padding: 8px 12px; background: var(--bg-2); border-left: 3px solid var(--accent-2); border-radius: 4px; font-size: 12px; line-height: 1.55; color: var(--fg); }
+
+  /* ───── SM-2 mistake row ───── */
+  .mistake-row .ease-badge {
+    font-size: 10px; padding: 1px 7px; border-radius: 99px;
+    background: rgba(192,132,252,.12); color: var(--accent-3);
+    border: 1px solid rgba(192,132,252,.3); margin-left: 6px; font-weight: 700;
+    font-family: ui-monospace, monospace;
+  }
+  .mistake-row .reps-badge {
+    font-size: 10px; padding: 1px 7px; border-radius: 99px;
+    background: var(--panel-2); color: var(--muted); border: 1px solid var(--line);
+    margin-left: 4px; font-weight: 600;
+  }
+  .mistake-row .actions button.sm2-got    { color: var(--ok); border-color: rgba(74,222,128,.4); }
+  .mistake-row .actions button.sm2-got:hover    { background: rgba(74,222,128,.1); border-color: var(--ok); color: var(--ok); }
+  .mistake-row .actions button.sm2-strug  { color: var(--warn); border-color: rgba(251,191,36,.4); }
+  .mistake-row .actions button.sm2-strug:hover  { background: rgba(251,191,36,.1); border-color: var(--warn); color: var(--warn); }
+  .mistake-row .actions button.sm2-done   { color: var(--muted); }
+
+  /* ───── sync modal ───── */
+  .sync-status {
+    padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5;
+    background: var(--panel-2); border: 1px solid var(--line); margin-bottom: 14px;
+  }
+  .sync-status.ok    { border-left: 3px solid var(--ok);   color: var(--fg); }
+  .sync-status.err   { border-left: 3px solid var(--hard); color: var(--hard); }
+  .sync-status.warn  { border-left: 3px solid var(--warn); color: var(--warn); }
+  .sync-status.busy  { border-left: 3px solid var(--accent-2); color: var(--easy); }
+  .sync-status .last { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .sync-row { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; }
+  .sync-row label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .sync-row input[type=password], .sync-row input[type=text] {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--fg);
+    padding: 8px 12px; border-radius: 6px; font-size: 12px; outline: none;
+    font-family: ui-monospace, monospace;
+  }
+  .sync-row input[type=password]:focus, .sync-row input[type=text]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,153,0,.12); }
+  .sync-row .help { color: var(--muted); font-size: 11px; line-height: 1.45; }
+  .sync-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .sync-actions button { background: var(--panel-2); border: 1px solid var(--line); color: var(--fg); padding: 8px 14px; border-radius: 99px; cursor: pointer; font-size: 12px; }
+  .sync-actions button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .sync-actions button.primary { background: var(--grad-1); color: #000; border: 0; font-weight: 700; }
+  .sync-actions button.danger { color: var(--hard); border-color: rgba(248,113,113,.4); }
+  .sync-actions button.danger:hover { background: rgba(248,113,113,.1); border-color: var(--hard); color: var(--hard); }
+  .sync-actions button:disabled { opacity: .5; cursor: not-allowed; }
+  .sync-toggle { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 13px; }
+  .sync-toggle input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+  .sync-notes {
+    background: rgba(251,191,36,.06); border-left: 3px solid var(--warn);
+    padding: 10px 14px; border-radius: 4px; font-size: 12px; line-height: 1.55; margin-top: 10px;
+  }
+  .sync-notes b { color: var(--warn); }
+  .sync-cloud-icon { color: var(--ok); margin-left: 4px; }
+
   /* ───── mocks tab ───── */
   .mock-card {
     background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px;
@@ -803,6 +926,78 @@
     background: rgba(248,113,113,.04); border-left: 3px solid var(--hard); padding: 10px 14px; border-radius: 4px; margin: 6px 0;
   }
   .mock-stage b { color: var(--hard); }
+
+  /* ───── guided tour ───── */
+  .tour-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 300; }
+  .tour-overlay.show { pointer-events: auto; }
+  .tour-spotlight {
+    position: fixed; pointer-events: none;
+    border: 3px solid var(--accent); border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.78), 0 0 24px rgba(255,153,0,.6);
+    transition: top .35s cubic-bezier(.22,1,.36,1),
+                left .35s cubic-bezier(.22,1,.36,1),
+                width .35s cubic-bezier(.22,1,.36,1),
+                height .35s cubic-bezier(.22,1,.36,1);
+    z-index: 301; display: none;
+  }
+  .tour-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.78);
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+    z-index: 300; display: none;
+  }
+  .tour-backdrop.show { display: block; }
+  .tour-tooltip {
+    position: fixed;
+    background: var(--panel); border: 1px solid var(--accent);
+    border-radius: 10px; padding: 16px 18px;
+    max-width: 360px; font-size: 13px; line-height: 1.55;
+    box-shadow: 0 12px 32px rgba(0,0,0,.5);
+    z-index: 302; pointer-events: auto;
+    transition: top .35s cubic-bezier(.22,1,.36,1),
+                left .35s cubic-bezier(.22,1,.36,1);
+    color: var(--fg); display: none;
+  }
+  .tour-tooltip.show { display: block; }
+  .tour-tooltip.center {
+    left: 50% !important; top: 50% !important;
+    transform: translate(-50%, -50%);
+    max-width: 440px;
+  }
+  .tour-tooltip h3 {
+    margin: 0 0 6px; font-size: 15px; color: var(--accent); font-weight: 700;
+  }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .tour-tooltip h3 { background: var(--grad-1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  }
+  .tour-tooltip p { margin: 0; color: var(--fg); }
+  .tour-tooltip p b { color: var(--accent); }
+  .tour-tooltip-controls {
+    display: flex; gap: 8px; margin-top: 12px;
+    align-items: center; justify-content: space-between; flex-wrap: wrap;
+  }
+  .tour-tooltip-controls .step-info {
+    font-size: 11px; color: var(--muted); font-family: ui-monospace, "SF Mono", monospace;
+  }
+  .tour-tooltip-controls button {
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--fg);
+    padding: 5px 12px; border-radius: 99px; cursor: pointer; font-size: 12px;
+    transition: all .15s;
+  }
+  .tour-tooltip-controls button.primary {
+    background: var(--grad-1); color: #000; border: 0; font-weight: 700;
+  }
+  .tour-tooltip-controls button:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .tour-tooltip-controls button.primary:hover { color: #000; border: 0; }
+  .tour-skip { color: var(--muted); font-size: 11px; cursor: pointer; user-select: none; }
+  .tour-skip:hover { color: var(--accent); }
+  .tour-btn-row { display: flex; gap: 6px; }
+  @media (max-width: 720px) {
+    .tour-tooltip { max-width: calc(100vw - 32px); }
+    .tour-tooltip.center { max-width: calc(100vw - 32px); }
+  }
+  @media print {
+    .tour-overlay, .tour-backdrop, .tour-spotlight, .tour-tooltip { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -816,32 +1011,32 @@
     <div class="progress">
       <div class="progress-bar" role="progressbar" aria-label="Overall progress"><div class="progress-fill" id="bar"></div></div>
       <div class="stats">
-        <span class="pill"><b id="done">0</b>/<b id="total">0</b> tasks</span>
-        <span class="pill streak">🔥 Streak <b id="streak">0</b></span>
-        <span class="pill level">⭐ Level <b id="level">1</b> · <b id="xp">0</b> XP</span>
-        <span class="pill">📅 Day <b id="day-completed">0</b>/60</span>
-        <span class="pill">DSA <b id="s-dsa">0</b></span>
-        <span class="pill">SD <b id="s-sd">0</b></span>
-        <span class="pill">LP <b id="s-lp">0</b></span>
-        <span class="pill">BE <b id="s-be">0</b></span>
-        <span class="pill">Mocks <b id="s-mk">0</b></span>
-        <span class="pill">Labs <b id="s-lab">0</b></span>
+        <span class="pill" title="Total tasks completed across the whole 60-day plan."><b id="done">0</b>/<b id="total">0</b> tasks</span>
+        <span class="pill streak" title="Days in a row you've completed at least one task. Resets on a missed day.">🔥 Streak <b id="streak">0</b></span>
+        <span class="pill level" title="Your level and total XP. XP is earned by completing tasks; bigger tasks award more.">⭐ Level <b id="level">1</b> · <b id="xp">0</b> XP</span>
+        <span class="pill" title="Days fully completed out of the 60-day plan.">📅 Day <b id="day-completed">0</b>/60</span>
+        <span class="pill" title="DSA problems solved across all days.">DSA <b id="s-dsa">0</b></span>
+        <span class="pill" title="System Design tasks completed across all days.">SD <b id="s-sd">0</b></span>
+        <span class="pill" title="Leadership Principles tasks completed across all days.">LP <b id="s-lp">0</b></span>
+        <span class="pill" title="Backend engineering tasks completed across all days.">BE <b id="s-be">0</b></span>
+        <span class="pill" title="Mock interview tasks completed across all days.">Mocks <b id="s-mk">0</b></span>
+        <span class="pill" title="Linux/networking lab tasks completed across all days.">Labs <b id="s-lab">0</b></span>
       </div>
     </div>
     <div class="tabs" role="tablist">
-      <button data-view="schedule" class="active" role="tab">Schedule</button>
-      <button data-view="resources" role="tab">Resources</button>
-      <button data-view="grind" role="tab">Grind 169</button>
-      <button data-view="concepts" role="tab">🧠 Concepts</button>
-      <button data-view="sysdesign" role="tab">🏗 System Design</button>
-      <button data-view="backend" role="tab">🛠 Backend</button>
-      <button data-view="linux" role="tab">🐧 Linux & Net</button>
-      <button data-view="mocks" role="tab">🎙 Mocks</button>
-      <button data-view="cheats" role="tab">📄 Cheats</button>
-      <button data-view="lp" role="tab">LP Playbook</button>
-      <button data-view="achievements" role="tab">🏆 Badges</button>
-      <button data-view="mistakes" role="tab">📝 Mistakes</button>
-      <button data-view="stats" role="tab">📈 Stats</button>
+      <button data-view="schedule" class="active" role="tab" title="Daily plan with tasks, timers, and notes.">Schedule</button>
+      <button data-view="resources" role="tab" title="Curated study resources, books, and links.">Resources</button>
+      <button data-view="grind" role="tab" title="Grind 169 problem list with progress tracking.">Grind 169</button>
+      <button data-view="concepts" role="tab" title="Browse algorithm concepts with animations and code.">🧠 Concepts</button>
+      <button data-view="sysdesign" role="tab" title="System design concepts, problems, and patterns.">🏗 System Design</button>
+      <button data-view="backend" role="tab" title="Backend engineering concepts and project guides.">🛠 Backend</button>
+      <button data-view="linux" role="tab" title="Linux, networking, and ops fundamentals + lab exercises.">🐧 Linux & Net</button>
+      <button data-view="mocks" role="tab" title="Mock-interview prep playbooks and self-recorded drills.">🎙 Mocks</button>
+      <button data-view="cheats" role="tab" title="Printable per-topic cheat sheets.">📄 Cheats</button>
+      <button data-view="lp" role="tab" title="Leadership Principles playbook with STAR stories.">LP Playbook</button>
+      <button data-view="achievements" role="tab" title="Achievements unlocked as you complete the plan.">🏆 Badges</button>
+      <button data-view="mistakes" role="tab" title="Mistake log: problems you flagged for revisit.">📝 Mistakes</button>
+      <button data-view="stats" role="tab" title="Progress charts, weak concepts, and per-track breakdowns.">📈 Stats</button>
     </div>
   </div>
 
@@ -858,7 +1053,9 @@
     <button class="icon" id="print-btn" title="Print or save as PDF" aria-label="Print">🖨</button>
     <button class="icon" id="export-btn" title="Export progress as JSON" aria-label="Export progress">⬇ Export</button>
     <button class="icon" id="import-btn" title="Import progress JSON" aria-label="Import progress">⬆ Import</button>
+    <button class="icon" id="sync-btn" title="Cloud sync via GitHub Gist" aria-label="Cloud sync">🔄 Sync</button>
     <input type="file" id="import-file" accept="application/json" style="display:none" />
+    <button class="icon" id="tour-btn" title="Take the guided tour" aria-label="Take the guided tour">🗺 Tour</button>
     <span class="kbd" title="Keyboard shortcuts">? for help</span>
   </div>
 
@@ -869,6 +1066,13 @@
 <div id="toast" class="toast"></div>
 <div id="modal-bg" class="modal-bg"><div class="modal" id="modal"></div></div>
 <div id="focus-overlay" class="focus-overlay" style="display:none"></div>
+
+<!-- ───── guided tour overlay ───── -->
+<div id="tour-backdrop" class="tour-backdrop"></div>
+<div id="tour-overlay" class="tour-overlay">
+  <div id="tour-spotlight" class="tour-spotlight"></div>
+  <div id="tour-tooltip" class="tour-tooltip" role="dialog" aria-live="polite" aria-label="Guided tour"></div>
+</div>
 
 <main>
   <section id="view-schedule"></section>
@@ -901,7 +1105,6 @@ const YT = q => `https://www.youtube.com/results?search_query=${encodeURICompone
 const BBG = "https://www.youtube.com/@ByteByteGo";
 const GS  = "https://www.youtube.com/@gkcs";
 const SDP = "https://github.com/donnemartin/system-design-primer";
-const DDIA = "https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/";
 const CFL = "https://www.cloudflare.com/learning/";
 const BANDIT = "https://overthewire.org/wargames/bandit/";
 const FASTAPI = "https://fastapi.tiangolo.com/";
@@ -3712,7 +3915,7 @@ const SD_CONCEPTS = [  {
         │   DB    │   ← stateful, sharding/replication later
         └─────────┘</pre>`,
     example: "<b>Amazon retail front-end:</b> stateless EC2 fleet behind an ALB; sessions stored in DynamoDB so any box can serve any user.",
-    reading: "DDIA Ch.1 + Ch.6 (Partitioning)."
+    reading: "System Design Primer: 'Scalability' chapter. AWS Builders' Library: 'Workload isolation using shuffle-sharding.'"
   },
 
   {
@@ -3748,7 +3951,7 @@ client →  │ Load Balancer │  health-checks every N sec
    │ Node A │        │ Node B │
    └────────┘        └────────┘</pre>`,
     example: "<b>L7 ALB</b> at Amazon: routes <code>/api/orders/*</code> to the orders service, <code>/api/cart/*</code> to cart service, terminates TLS, runs WAF rules at the edge.",
-    reading: "Cloudflare Learning: 'What is load balancing?' + DDIA Ch.6."
+    reading: "Cloudflare Learning: 'What is load balancing?' + System Design Primer 'Load balancer' section."
   },
 
   {
@@ -3838,7 +4041,7 @@ client ──────┐
       "Using Postgres for full-text search at scale instead of an indexer — works until 10M docs."
     ],
     example: "<b>Orders service:</b> Postgres (need ACID transactions across order + payment + inventory). <b>Cart service:</b> DynamoDB (single-key access, huge fan-out, eventual consistency is fine).",
-    reading: "DDIA Ch.2 (Data Models) and Ch.3 (Storage Engines). AWS 'When to use which DB' decision tree."
+    reading: "System Design Primer 'SQL vs NoSQL' section. AWS 'When to use which DB' decision tree. Use The Index, Luke! (use-the-index-luke.com)."
   },
 
   {
@@ -3868,7 +4071,7 @@ user_id=42  →  shard 2
 user_id=7   →  shard 3
 user_id=100 →  shard 0   ← consistent hashing minimizes movement on resize</pre>`,
     example: "<b>DynamoDB partitions</b> shard by hash of partition-key automatically. Choose a partition key with high cardinality and even traffic to avoid hot partitions.",
-    reading: "DDIA Ch.6 (Partitioning). 'Consistent hashing' explained — Gaurav Sen video."
+    reading: "System Design Primer 'Database — Sharding' section. 'Consistent hashing' explained — Gaurav Sen video."
   },
 
   {
@@ -3903,7 +4106,7 @@ user_id=100 →  shard 0   ← consistent hashing minimizes movement on resize</
                              │ Replica2 │  ← reads
                              └──────────┘</pre>`,
     example: "<b>RDS Multi-AZ (sync) + read replicas (async):</b> sync standby for failover, async replicas for read traffic.",
-    reading: "DDIA Ch.5 (Replication)."
+    reading: "System Design Primer 'Replication' section. Postgres docs 'High Availability, Load Balancing, and Replication.'"
   },
 
   {
@@ -4092,7 +4295,7 @@ Validate signature → check expiry → load claims → authorize</pre>`,
 └──────────┘
        └─────────────▶ CloudWatch / Prometheus / X-Ray / Honeycomb</pre>`,
     example: "<b>RED method:</b> for every service track Request rate, Error rate, Duration (p50/p99). Three dashboards = 90% of useful observability.",
-    reading: "Google SRE Book: 'Monitoring Distributed Systems.' Honeycomb blog on cardinality."
+    reading: "Google SRE Book (free online at sre.google/sre-book): 'Monitoring Distributed Systems.' Honeycomb blog on cardinality."
   },
 
   {
@@ -6514,7 +6717,7 @@ const SCHEDULE = [
 {day:15, dow:"Mon", week:3, title:"String Med",
  slots:[
   slot("AM",60, dsa("Longest Repeating Character Replacement"), revQ("Group Anagrams")),
-  slot("LU",30, sdc("replication", "Now that you've seen DB choice, level up: how a primary becomes a fleet. Sync vs async replication, the read-your-writes trap. Critical context for the DDIA Ch.5 reading on Day 24 and Project 1 multi-AZ talk in Week 4.")),
+  slot("LU",30, sdc("replication", "Now that you've seen DB choice, level up: how a primary becomes a fleet. Sync vs async replication, the read-your-writes trap. Critical context for the Postgres replication docs and Project 1 multi-AZ talk in Week 4.")),
   slot("NT",90, dsa("Largest Number","Encode and Decode Strings"))
  ]},
 {day:16, dow:"Tue", week:3, title:"String Hard",
@@ -6926,7 +7129,7 @@ const RESOURCES = {
   "System Design · Reading": [
     ["System Design Primer (donnemartin)",SDP],
     ["Latency numbers every programmer should know","https://gist.github.com/jboner/2841832"],
-    ["DDIA (Designing Data-Intensive Applications)",DDIA],
+    ["Use The Index, Luke! (free DB indexing book)","https://use-the-index-luke.com/"],
     ["Cloudflare Learning hub",CFL],
     ["What is a CDN",CFL+"cdn/what-is-a-cdn/"],
     ["What is TLS",CFL+"ssl/transport-layer-security-tls/"],
@@ -7055,14 +7258,20 @@ const LP_MATRIX = [
 // ====================================================================
 const STORE_KEY = "amzn-tracker-v1";
 const state = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
-function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+function save(){
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  if (typeof scheduleAutoSync === "function") scheduleAutoSync();
+}
 function isDone(id){ return !!state[id]; }
 function setDone(id, v){ if(v) state[id]=1; else delete state[id]; save(); updateStats(); refreshHeatmapCells(); }
 
 // ───── notes & mistake log ─────
 const NOTES_KEY = "amzn-tracker-notes-v1";
 const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || "{}");
-function saveNotes(){ localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
+function saveNotes(){
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  if (typeof scheduleAutoSync === "function") scheduleAutoSync();
+}
 function getNote(id){ return notes[id] || {text:"", revisit:false, timestamps:[]}; }
 function setNote(id, patch){
   const cur = getNote(id);
@@ -7070,10 +7279,70 @@ function setNote(id, patch){
   saveNotes();
 }
 
+// ───── SM-2 lite spaced repetition ─────
+// Each revisit-flagged note carries: intervalDays, easeFactor, repetitions, nextDueAt.
+// Defaults on first flag: 3d / ease 2.5 / reps 0. See sm2GotIt / sm2Struggling below.
+const DAY_MS = 86400000;
+function sm2Defaults(initialTs){
+  const ts = initialTs || Date.now();
+  return {
+    intervalDays: 3,
+    easeFactor: 2.5,
+    repetitions: 0,
+    nextDueAt: ts + 3 * DAY_MS
+  };
+}
+// Migrate existing notes: any flagged note missing SM-2 fields gets defaults derived
+// from the first timestamp (treated as the original flag time).
+function ensureSM2(id){
+  const n = getNote(id);
+  if (!n.revisit) return n;
+  if (n.intervalDays !== undefined && n.easeFactor !== undefined &&
+      n.repetitions !== undefined && n.nextDueAt !== undefined) return n;
+  const initialTs = (n.timestamps && n.timestamps[0]) || Date.now();
+  const defaults = sm2Defaults(initialTs);
+  setNote(id, defaults);
+  return getNote(id);
+}
+function sm2GotIt(id){
+  const n = ensureSM2(id);
+  const reps = (n.repetitions || 0) + 1;
+  // Per spec: compute interval using the CURRENT ease, then bump ease.
+  const curEase = (n.easeFactor || 2.5);
+  let interval;
+  if (reps === 1) interval = 3;
+  else if (reps === 2) interval = 7;
+  else interval = Math.min(90, Math.round((n.intervalDays || 3) * curEase));
+  const ease = Math.min(3.0, curEase + 0.1);
+  setNote(id, {
+    repetitions: reps,
+    easeFactor: ease,
+    intervalDays: interval,
+    nextDueAt: Date.now() + interval * DAY_MS
+  });
+}
+function sm2Struggling(id){
+  const n = ensureSM2(id);
+  const ease = Math.max(1.3, (n.easeFactor || 2.5) - 0.2);
+  setNote(id, {
+    repetitions: 0,
+    easeFactor: ease,
+    intervalDays: 3,
+    nextDueAt: Date.now() + 3 * DAY_MS
+  });
+}
+
 // ───── settings (theme, view mode, sound, profile, heatmap mode) ─────
 const SETTINGS_KEY = "amzn-tracker-settings-v1";
 const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{"theme":"dark","mode":"today","sound":false,"name":"","heatmap":"strip"}');
-function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+// defaults for newer keys (pomodoro, first-run tip, sync) — preserve existing values
+if (settings.pomodoro === undefined) settings.pomodoro = true;
+if (settings.dismissedFirstRunTip === undefined) settings.dismissedFirstRunTip = false;
+if (settings.gistAutoSync === undefined) settings.gistAutoSync = false;
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  if (typeof scheduleAutoSync === "function") scheduleAutoSync();
+}
 function applyTheme(){ document.documentElement.setAttribute("data-theme", settings.theme); }
 applyTheme();
 
@@ -7084,13 +7353,19 @@ const timers = {}; // key: dayN-slotI, value: {endsAt, intervalId}
 const TIMES_KEY = "amzn-tracker-times-v1";
 const solveTimes = JSON.parse(localStorage.getItem(TIMES_KEY) || "{}");
 // shape: { problemSlug: { totalSec: 123, sessions: [{started, ended}] } }
-function saveTimes(){ localStorage.setItem(TIMES_KEY, JSON.stringify(solveTimes)); }
+function saveTimes(){
+  localStorage.setItem(TIMES_KEY, JSON.stringify(solveTimes));
+  if (typeof scheduleAutoSync === "function") scheduleAutoSync();
+}
 
 // ───── Backend project step completion ─────
 const PROJ_KEY = "amzn-tracker-projsteps-v1";
 const projSteps = JSON.parse(localStorage.getItem(PROJ_KEY) || "{}");
 // shape: { "task-mgmt-api-step-1": 1, ... }
-function saveProj(){ localStorage.setItem(PROJ_KEY, JSON.stringify(projSteps)); }
+function saveProj(){
+  localStorage.setItem(PROJ_KEY, JSON.stringify(projSteps));
+  if (typeof scheduleAutoSync === "function") scheduleAutoSync();
+}
 function isStepDone(projectId, stepN){ return !!projSteps[`${projectId}-step-${stepN}`]; }
 function setStepDone(projectId, stepN, v){
   const k = `${projectId}-step-${stepN}`;
@@ -7119,6 +7394,7 @@ function startStopTimer(slug, btnEl){
     delete ttimers[slug];
     btnEl.classList.remove("running"); btnEl.classList.add("logged");
     btnEl.textContent = `⏱ ${formatDuration(solveTimes[slug].totalSec)}`;
+    btnEl.setAttribute("title", "Total time you've spent on this problem. Click to start a new session.");
     toast(`⏱ Logged ${formatDuration(elapsed)} on this problem (total: ${formatDuration(solveTimes[slug].totalSec)})`);
     return;
   }
@@ -7130,6 +7406,7 @@ function startStopTimer(slug, btnEl){
   tick();
   ttimers[slug] = { startedAt, intervalId: setInterval(tick, 1000) };
   btnEl.classList.add("running"); btnEl.classList.remove("logged");
+  btnEl.setAttribute("title", "Timer running. Click to stop and log this session.");
 }
 function formatDuration(s){
   if (s < 60) return `${s}s`;
@@ -7144,7 +7421,7 @@ function renderTaskHTML(taskId, t){
   const hasNote = !!noteData.text || noteData.revisit;
   const noteCls = hasNote ? "note-toggle has-note" : "note-toggle";
   const noteIcon = noteData.revisit ? "🔁" : (noteData.text ? "📝" : "+");
-  const noteUI = `<span class="${noteCls}" data-noteid="${taskId}" title="Add a note / mark for revisit">${noteIcon}</span>
+  const noteUI = `<span class="${noteCls}" data-noteid="${taskId}" title="Add a note. Use 'mark for revisit' to add this to the mistake log.">${noteIcon}</span>
     <textarea class="note-input" data-noteid="${taskId}" placeholder="Note (what tripped you up, learning) · check ☐ revisit to add to mistake log" style="display:${hasNote||noteData._open?'block':'none'}">${noteData.text||""}</textarea>
     <label style="font-size:11px;color:var(--muted);display:${hasNote||noteData._open?'inline-flex':'none'};align-items:center;gap:4px;margin-top:4px;cursor:pointer" data-noteid="${taskId}">
       <input type=checkbox class="note-revisit" data-noteid="${taskId}" ${noteData.revisit?'checked':''}> mark for revisit
@@ -7160,7 +7437,7 @@ function renderTaskHTML(taskId, t){
         const c = CONCEPTS[cid]; if (!c) return "";
         return `<span class="concept-chip" data-concept="${cid}" title="${c.summary.replace(/"/g,'&quot;')}">${c.name}</span>`;
       }).join("");
-      return `<a href="${LC(slug)}" target="_blank" rel="noopener">${n}</a><span class="badge ${bclass}">${dlabel}</span>${concepts ? `<span class="concepts">${concepts}</span>` : ""}`;
+      return `<a href="${LC(slug)}" target="_blank" rel="noopener">${n}</a><span class="badge ${bclass}" title="${premium ? 'Premium (LeetCode subscription required)' : (diff === 'E' ? 'Easy' : diff === 'M' ? 'Medium' : diff === 'H' ? 'Hard' : diff)}">${dlabel}</span>${concepts ? `<span class="concepts">${concepts}</span>` : ""}`;
     }).join(" · ");
     // extras row: WHY + per-problem timer (one row per task)
     const extras = t.names.map(n => {
@@ -7168,8 +7445,9 @@ function renderTaskHTML(taskId, t){
       const [slug] = meta;
       const why = PROBLEM_WHY[n];
       const timeLogged = solveTimes[slug] && solveTimes[slug].totalSec;
-      const timerBtn = `<span class="ttimer ${timeLogged ? 'logged' : ''}" data-ttimer-slug="${slug}">${timeLogged ? `⏱ ${formatDuration(solveTimes[slug].totalSec)}` : "▶ Time"}</span>`;
-      const whyToggle = why ? `<span class="why-toggle" data-why-slug="${slug}">💡 Why this?</span>` : "";
+      const timerTitle = timeLogged ? "Total time you've spent on this problem. Click to start a new session." : "Start a per-problem solve timer. Click again to stop and log.";
+      const timerBtn = `<span class="ttimer ${timeLogged ? 'logged' : ''}" data-ttimer-slug="${slug}" title="${timerTitle}">${timeLogged ? `⏱ ${formatDuration(solveTimes[slug].totalSec)}` : "▶ Time"}</span>`;
+      const whyToggle = why ? `<span class="why-toggle" data-why-slug="${slug}" title="Show why this problem was chosen for today.">💡 Why this?</span>` : "";
       const whyText = why ? `<div class="why-text" data-why-text="${slug}"><b>Why this problem:</b> ${why}</div>` : "";
       return `<div class="dsa-extras">${whyToggle}${timerBtn}${whyText}</div>`;
     }).join("");
@@ -7219,7 +7497,7 @@ function renderTaskHTML(taskId, t){
     const name = c ? c.name : t.conceptId;
     const summary = c ? c.summary : "";
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-SD">SD</span>
-      <b>Open in-app:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="concept:${t.conceptId}">🏗 ${name}</a>
+      <b>Open in-app:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="concept:${t.conceptId}" title="Open this System Design concept/problem in-app.">🏗 ${name}</a>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:var(--accent)">Why today:</b> ${t.why}</div>
       ${summary ? `<div style="margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;font-style:italic">${summary}</div>` : ""}
       ${noteUI}</span></li>`;
@@ -7229,7 +7507,7 @@ function renderTaskHTML(taskId, t){
     const name = p ? p.name : t.problemId;
     const summary = p ? p.summary : "";
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-SD">SD</span>
-      <b>Walk-through:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="problem:${t.problemId}">🏗 ${name}</a>
+      <b>Walk-through:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="problem:${t.problemId}" title="Open this System Design concept/problem in-app.">🏗 ${name}</a>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:var(--accent)">Why today:</b> ${t.why}</div>
       ${summary ? `<div style="margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;font-style:italic">${summary}</div>` : ""}
       ${noteUI}</span></li>`;
@@ -7241,7 +7519,7 @@ function renderTaskHTML(taskId, t){
     const lp = (typeof LP_DATA !== 'undefined') ? LP_DATA.find(x => x.id === t.lpId) : null;
     const lpName = t.lpId === "all" ? "All LPs (overview)" : (lp ? lp.name : t.lpId);
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-LP">LP</span>
-      <b>Open LP playbook:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="lp:${t.lpId}">📖 ${lpName}</a>
+      <b>Open LP playbook:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="lp:${t.lpId}" title="Open this LP playbook in-app.">📖 ${lpName}</a>
       <div style="margin-top:4px;color:var(--fg);font-size:13px;line-height:1.5"><b style="color:var(--ok)">Today's drill:</b> ${t.action}</div>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:var(--ok)">Why today:</b> ${t.why}</div>
       ${noteUI}</span></li>`;
@@ -7255,7 +7533,7 @@ function renderTaskHTML(taskId, t){
     const name = c ? c.name : t.conceptId;
     const summary = c ? c.summary : "";
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-BE">BE</span>
-      <b>Open in-app:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="beconcept:${t.conceptId}">🛠 ${name}</a>
+      <b>Open in-app:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="beconcept:${t.conceptId}" title="Open this Backend concept/project in-app.">🛠 ${name}</a>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:#c084fc">Why today:</b> ${t.why}</div>
       ${summary ? `<div style="margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;font-style:italic">${summary}</div>` : ""}
       ${noteUI}</span></li>`;
@@ -7267,7 +7545,7 @@ function renderTaskHTML(taskId, t){
     const stepLabel = step ? ` · Step ${step.n}: ${step.title}` : "";
     const stepGoal = step ? step.goal : "";
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-BE">BE</span>
-      <b>Project guide:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="beproject:${t.projectId}">🛠 ${name}${stepLabel}</a>
+      <b>Project guide:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="beproject:${t.projectId}" title="Open this Backend concept/project in-app.">🛠 ${name}${stepLabel}</a>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:#c084fc">Why today:</b> ${t.why}</div>
       ${stepGoal ? `<div style="margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;font-style:italic">Goal: ${stepGoal}</div>` : ""}
       ${noteUI}</span></li>`;
@@ -7281,7 +7559,7 @@ function renderTaskHTML(taskId, t){
     const name = c ? c.name : t.conceptId;
     const summary = c ? c.summary : "";
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-LAB">LX</span>
-      <b>Open in-app:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="lxconcept:${t.conceptId}">🐧 ${name}</a>
+      <b>Open in-app:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="lxconcept:${t.conceptId}" title="Open this Linux concept/lab in-app.">🐧 ${name}</a>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:var(--warn)">Why today:</b> ${t.why}</div>
       ${summary ? `<div style="margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;font-style:italic">${summary}</div>` : ""}
       ${noteUI}</span></li>`;
@@ -7292,7 +7570,7 @@ function renderTaskHTML(taskId, t){
     const why = l ? l.why : "";
     const url = l ? l.url : "";
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-LAB">LAB</span>
-      <b>Open lab guide:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="lxlab:${t.labId}">🐧 ${name}</a>
+      <b>Open lab guide:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="lxlab:${t.labId}" title="Open this Linux concept/lab in-app.">🐧 ${name}</a>
       ${url ? ` · <a href="${url}" target="_blank" rel="noopener">launch</a>` : ""}
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:var(--warn)">Why today:</b> ${t.why}</div>
       ${why ? `<div style="margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;font-style:italic">${why}</div>` : ""}
@@ -7306,7 +7584,7 @@ function renderTaskHTML(taskId, t){
     const p = (typeof MOCK_PREP !== 'undefined') ? MOCK_PREP.find(x => x.id === t.prepId) : null;
     const label = p ? p.label : t.prepId;
     return `<li><input type=checkbox ${checked} data-id="${taskId}"><span class="task-text"><span class="tag t-MK">MOCK</span>
-      <b>Open mock prep:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="mockprep:${t.prepId}">🎙 ${label}</a>
+      <b>Open mock prep:</b> <a href="#" class="sd-deeplink" data-sd-deeplink="mockprep:${t.prepId}" title="Open this Mock playbook in-app.">🎙 ${label}</a>
       <div style="margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5"><b style="color:var(--hard)">Why today:</b> ${t.why}</div>
       ${noteUI}</span></li>`;
   }
@@ -7387,25 +7665,49 @@ function renderHeatmap(){
   return html;
 }
 
-// Pick a vehicle based on completion tier — bike → car → motorbike → train → rocket → trophy
+// Pick a journey face emoji based on completion tier. Faces look forward, so
+// they never appear "running backward" the way directional emoji (🚶 🏎️) do.
+// Arc: starting out → focused → engaged → fired up → genius → champion.
 function vehicleForCompletion(done, total){
   if (done === total && total > 0) return { emoji: "🏆", label: "Done!" };
   const pct = total ? done / total : 0;
-  if (pct < 0.10) return { emoji: "🚶", label: "On foot" };
-  if (pct < 0.25) return { emoji: "🚲", label: "Bike" };
-  if (pct < 0.45) return { emoji: "🛵", label: "Scooter" };
-  if (pct < 0.65) return { emoji: "🚗", label: "Car" };
-  if (pct < 0.85) return { emoji: "🏎️", label: "Race car" };
-  return { emoji: "🚀", label: "Rocket" };
+  if (pct < 0.10) return { emoji: "😊", label: "Just starting" };
+  if (pct < 0.25) return { emoji: "🤖", label: "Locked in" };
+  if (pct < 0.45) return { emoji: "🤓", label: "Studying hard" };
+  if (pct < 0.65) return { emoji: "😎", label: "Confident" };
+  if (pct < 0.85) return { emoji: "🤩", label: "Crushing it" };
+  return { emoji: "🧠", label: "Big brain" };
 }
 
 function renderJourney(){
   const totalDone = SCHEDULE.filter(d => dayPct(d) === 100).length;
   const total = SCHEDULE.length;
-  const fillPct = total ? (totalDone / total) * 100 : 0;
+  const fillPct = total ? totalDone / total : 0;
   const v = vehicleForCompletion(totalDone, total);
-  // checkpoints at week boundaries (every 7 days, plus 60)
-  const checkpoints = [
+
+  // SVG path geometry: a winding road through the viewBox.
+  // viewBox is 1000 wide; height ~200. Path uses 4 gentle S-curves.
+  const VB_W = 1000, VB_H = 200;
+  const pathD = `M 30 100
+                 C 130 30, 220 30, 280 100
+                 S 430 170, 500 100
+                 S 650 30, 720 100
+                 S 870 170, 970 100`;
+
+  // Build a hidden path reference to compute point-at-length positions in JS later.
+  // For now compute approximate positions analytically by sampling t in [0,1].
+  // We don't have a real DOM path here at SSR time; we rely on getPointAtLength after mount.
+  // Layout: SVG renders, then a small post-mount script positions vehicle + checkpoint dots.
+
+  // Achievement checkpoints: distribute the 25 achievements along the path at regular fractions.
+  const cps = ACHIEVEMENTS.map((a, i) => {
+    const t = (i + 1) / (ACHIEVEMENTS.length + 1); // position along path 0..1
+    const earned = !!a.test();
+    return { id: a.id, ico: a.ico, name: a.name, desc: a.desc, t, earned };
+  });
+
+  // Week-boundary tick marks (W1..W8 + interview flag at the end). 60 days total → wN at day n*7.
+  const weekTicks = [
     { day: 7, label: "W1" },
     { day: 14, label: "W2" },
     { day: 21, label: "W3" },
@@ -7413,29 +7715,135 @@ function renderJourney(){
     { day: 35, label: "W5" },
     { day: 42, label: "W6" },
     { day: 49, label: "W7" },
-    { day: 56, label: "W8" },
-    { day: 60, label: "🎯" }
-  ];
+    { day: 56, label: "W8" }
+  ].map(w => ({ ...w, t: w.day / total }));
+
+  const earnedCount = cps.filter(c => c.earned).length;
+  const totalCp = cps.length;
+
   return `
     <div class="journey-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px">
         <div class="journey-tier"><span class="vehicle-emoji">${v.emoji}</span><span><b>${v.label}</b> · ${totalDone}/${total} days complete</span></div>
+        <div class="journey-tier"><span>🏆 <b>${earnedCount}</b>/${totalCp} achievements unlocked</span></div>
         <div class="journey-tier"><span>Today: <b>Day ${currentDay()}</b></span></div>
       </div>
-      <div class="journey-track">
-        <div class="journey-fill" style="width:${fillPct}%"></div>
-        <span class="journey-vehicle" style="left:${Math.max(2, fillPct)}%">${v.emoji}</span>
-        <span class="journey-flag">🏁</span>
-      </div>
-      <div class="journey-checkpoints">
-        ${checkpoints.map(cp => `<span class="journey-cp" style="left:${(cp.day/total)*100}%">${cp.label}</span>`).join("")}
+      <div class="journey-svg-wrap">
+        <svg class="journey-svg" viewBox="0 0 ${VB_W} ${VB_H}" preserveAspectRatio="none" aria-label="60-day journey with ${totalCp} achievement checkpoints">
+          <defs>
+            <linearGradient id="journeyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:var(--ok)"/>
+              <stop offset="100%" style="stop-color:var(--accent)"/>
+            </linearGradient>
+          </defs>
+          <!-- background road (full path, dashed) -->
+          <path id="journey-path" class="journey-road-bg" d="${pathD}"/>
+          <!-- progress fill (same path, partial stroke via dasharray) -->
+          <path id="journey-path-fill" class="journey-road-fill" d="${pathD}"/>
+          <!-- week ticks: small accent marks crossing the path -->
+          ${weekTicks.map(w => `<g data-week-tick="${w.t}"><circle r="3" fill="var(--accent)"/><text class="journey-week-marker" dy="-12">${w.label}</text></g>`).join("")}
+          <!-- achievement checkpoint dots -->
+          ${cps.map(c => `<g data-cp-id="${c.id}" data-cp-t="${c.t}" data-cp-earned="${c.earned}" style="cursor:pointer">
+            <circle class="journey-cp-dot ${c.earned ? 'earned' : ''}" r="11"/>
+            <text class="journey-cp-icon ${c.earned ? 'earned' : ''}" text-anchor="middle" dy="5">${c.ico}</text>
+          </g>`).join("")}
+          <!-- vehicle (positioned in JS) -->
+          <text id="journey-vehicle" class="journey-vehicle-svg" text-anchor="middle" dy="9">${v.emoji}</text>
+          <!-- finish flag at path end -->
+          <text id="journey-flag" class="journey-flag-svg" text-anchor="middle" dy="8">🏁</text>
+        </svg>
+        <div id="journey-tooltip" class="journey-cp-tooltip"></div>
       </div>
       <div class="journey-meta">
         <span>Day 1 (Mon May 18)</span>
-        <span><b>${Math.round(fillPct)}%</b> of the journey</span>
+        <span><b>${Math.round(fillPct * 100)}%</b> of the journey</span>
         <span>Day 60 (Mon Jul 13) · Interview</span>
       </div>
     </div>`;
+}
+
+// Position vehicle, checkpoint dots, and week ticks along the actual SVG path
+// (using getPointAtLength). Called after the journey markup is in the DOM.
+function layoutJourneySVG(){
+  const svg = document.querySelector(".journey-svg");
+  if (!svg) return;
+  const pathBg = svg.querySelector("#journey-path");
+  const pathFill = svg.querySelector("#journey-path-fill");
+  if (!pathBg || !pathFill) return;
+  const total = pathBg.getTotalLength();
+  if (!total) return;
+
+  // Progress fill: dasharray trick. Show only the first fillPct of the stroke.
+  const totalDone = SCHEDULE.filter(d => dayPct(d) === 100).length;
+  const fillPct = SCHEDULE.length ? totalDone / SCHEDULE.length : 0;
+  pathFill.style.strokeDasharray = `${total} ${total}`;
+  pathFill.style.strokeDashoffset = `${total * (1 - fillPct)}`;
+
+  // Position vehicle at fillPct along the path
+  const vehicle = svg.querySelector("#journey-vehicle");
+  if (vehicle){
+    const p = pathBg.getPointAtLength(Math.max(8, total * fillPct));
+    vehicle.setAttribute("x", p.x);
+    vehicle.setAttribute("y", p.y);
+  }
+
+  // Position finish flag at the path's end
+  const flag = svg.querySelector("#journey-flag");
+  if (flag){
+    const end = pathBg.getPointAtLength(total);
+    flag.setAttribute("x", end.x);
+    flag.setAttribute("y", end.y - 18);
+  }
+
+  // Position week ticks
+  svg.querySelectorAll("[data-week-tick]").forEach(g => {
+    const t = parseFloat(g.dataset.weekTick);
+    const p = pathBg.getPointAtLength(total * t);
+    g.setAttribute("transform", `translate(${p.x} ${p.y})`);
+  });
+
+  // Position checkpoint dots along the path; alternate above/below the curve to avoid clustering
+  const cpGroups = svg.querySelectorAll("[data-cp-id]");
+  cpGroups.forEach((g, i) => {
+    const t = parseFloat(g.dataset.cpT);
+    const p = pathBg.getPointAtLength(total * t);
+    // alternate offset perpendicular to path direction
+    const epsilon = 1.5;
+    const tNext = Math.min(1, t + 0.001);
+    const pNext = pathBg.getPointAtLength(total * tNext);
+    const dx = pNext.x - p.x, dy = pNext.y - p.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len; // perpendicular
+    const sign = (i % 2 === 0) ? -1 : 1;
+    const offset = 24;
+    const x = p.x + nx * sign * offset;
+    const y = p.y + ny * sign * offset;
+    g.setAttribute("transform", `translate(${x} ${y})`);
+  });
+
+  // Wire tooltip on checkpoint hover
+  const tip = document.getElementById("journey-tooltip");
+  if (!tip) return;
+  cpGroups.forEach(g => {
+    const id = g.dataset.cpId;
+    const a = ACHIEVEMENTS.find(x => x.id === id);
+    if (!a) return;
+    const earned = g.dataset.cpEarned === "true";
+    g.addEventListener("mouseenter", e => {
+      tip.innerHTML = `<b>${a.ico} ${a.name}</b><div class="desc">${a.desc}</div><div class="status ${earned ? '' : 'locked'}">${earned ? '✓ Unlocked' : '🔒 Locked'}</div>`;
+      tip.classList.add("show");
+      const wrap = svg.parentElement.getBoundingClientRect();
+      const dot = g.getBoundingClientRect();
+      tip.style.left = (dot.left - wrap.left + dot.width / 2) + "px";
+      tip.style.top = (dot.top - wrap.top) + "px";
+    });
+    g.addEventListener("mouseleave", () => tip.classList.remove("show"));
+    g.addEventListener("click", () => {
+      // Jump to Achievements tab
+      const btn = document.querySelector(".tabs button[data-view='achievements']");
+      if (btn) btn.click();
+    });
+  });
 }
 
 function renderCalendar(){
@@ -7653,6 +8061,11 @@ function renderStandup(){
 
 // ───── focus mode ─────
 let _focusTimer = null;
+// Pomodoro intervals (minutes)
+const POMO_WORK = 25;
+const POMO_BREAK = 5;
+const POMO_LONG_BREAK = 15;
+const POMO_CYCLES_BEFORE_LONG = 4;
 function enterFocusMode(){
   const today = SCHEDULE.find(d => d.day === currentDay()) || SCHEDULE[0];
   // Pick the slot most likely intended for this time of day
@@ -7687,33 +8100,93 @@ function renderFocusMode(today, slotIdx){
     const id = `d${today.day}-s${slotIdx}-t${ti}`;
     inner += renderTaskHTML(id, t);
   });
+
+  // ── pomodoro state (ephemeral; cycles persist across pause/resume but not across slot switches) ──
+  const pomoOn = !!settings.pomodoro;
+  // phase: "work" | "break" | "longbreak"
+  let phase = "work";
+  let cyclesDone = 0; // completed work cycles
+  // Initial duration label
+  const initialMins = pomoOn ? POMO_WORK : totalMins;
+
   overlay.innerHTML = `<div class="focus-card">
-    <button class="exit-focus" data-exit-focus>✕ Exit focus</button>
+    <button class="exit-focus" data-exit-focus title="Exit focus mode and return to the schedule.">✕ Exit focus</button>
     <div class="sub">DAY ${today.day} · ${today.dateLabel || today.dow}</div>
-    <h2>🎯 ${slot.slot} — ${totalMins} minutes</h2>
-    <div class="sub">${today.title} · ${done}/${total} done</div>
-    <div class="focus-timer" id="focus-timer">${totalMins}:00</div>
-    <div class="focus-controls">
-      <button class="primary" data-focus-action="start">▶ Start</button>
-      <button data-focus-action="pause">⏸ Pause</button>
-      <button data-focus-action="reset">↺ Reset</button>
-      <button data-focus-action="prev">← Prev slot</button>
-      <button data-focus-action="next">Next slot →</button>
+    <h2>🎯 ${slot.slot}${pomoOn ? "" : ` — ${totalMins} minutes`}</h2>
+    <div class="sub">${today.title} · ${done}/${total} done${pomoOn ? ` · This slot is ${totalMins} min (informational)` : ""}</div>
+    <div class="pomo-state ${pomoOn ? 'work' : ''}" id="pomo-state" style="${pomoOn ? '' : 'display:none'}">🔴 Work 1/${POMO_CYCLES_BEFORE_LONG}</div>
+    <div class="pomo-dots" id="pomo-dots" style="${pomoOn ? '' : 'display:none'}">
+      ${Array.from({length: POMO_CYCLES_BEFORE_LONG}).map((_, i) =>
+        `<div class="pomo-dot ${i === 0 ? 'current' : ''}" data-pomo-dot="${i}"></div>`).join("")}
     </div>
-    <div class="tasks-list">
+    <div class="focus-timer" id="focus-timer">${initialMins}:00</div>
+    <div class="pomo-break-msg" id="pomo-break-msg" style="display:none">
+      <b>☕ Take a break</b> — stretch, water, look out a window.
+    </div>
+    <div class="focus-controls">
+      <button class="primary" data-focus-action="start" title="Start the focus-mode countdown timer.">▶ Start</button>
+      <button data-focus-action="pause" title="Pause the focus-mode countdown timer.">⏸ Pause</button>
+      <button data-focus-action="reset" title="Reset the focus-mode countdown timer.">↺ Reset</button>
+      <button class="pomo-toggle ${pomoOn ? 'on' : ''}" data-focus-action="pomo" title="Toggle Pomodoro mode (25-min work / 5-min break cycles, 15-min long break every 4).">🍅 Pomodoro: ${pomoOn ? 'on' : 'off'}</button>
+      <button data-focus-action="prev" title="Jump to the previous slot in this day.">← Prev slot</button>
+      <button data-focus-action="next" title="Jump to the next slot in this day.">Next slot →</button>
+    </div>
+    <div class="tasks-list" id="focus-tasks-list">
       <ul class="tasks">${inner}</ul>
     </div>
   </div>`;
   // Wire task interactions inside focus mode
   wireScheduleInteractions(overlay);
+
   // Timer
   const timerEl = document.getElementById("focus-timer");
+  const stateEl = document.getElementById("pomo-state");
+  const dotsEl = document.getElementById("pomo-dots");
+  const breakMsgEl = document.getElementById("pomo-break-msg");
+  const tasksListEl = document.getElementById("focus-tasks-list");
   let endsAt = null;
+  let _pausedAt = null;
+  // currentDurationMins reflects whatever the active timer should show on Reset.
+  let currentDurationMins = pomoOn ? POMO_WORK : totalMins;
+
   function fmt(ms){
     const totalSec = Math.max(0, Math.round(ms / 1000));
     const m = Math.floor(totalSec / 60);
     const s = totalSec % 60;
     return `${m}:${String(s).padStart(2,"0")}`;
+  }
+  function updatePomoUI(){
+    if (!pomoOn) return;
+    // dots: filled = completed work cycles, current = the one in progress
+    dotsEl.querySelectorAll(".pomo-dot").forEach((d, i) => {
+      d.classList.toggle("filled", i < cyclesDone);
+      d.classList.toggle("current", phase === "work" && i === cyclesDone);
+    });
+    stateEl.classList.remove("work", "brk", "lbrk");
+    if (phase === "work"){
+      stateEl.classList.add("work");
+      stateEl.textContent = `🔴 Work ${Math.min(cyclesDone + 1, POMO_CYCLES_BEFORE_LONG)}/${POMO_CYCLES_BEFORE_LONG}`;
+      breakMsgEl.style.display = "none";
+      tasksListEl.classList.remove("dimmed");
+    } else if (phase === "break"){
+      stateEl.classList.add("brk");
+      stateEl.textContent = `☕ Break (${POMO_BREAK} min)`;
+      breakMsgEl.innerHTML = `<b>☕ Take a break</b> — stretch, water, look out a window.`;
+      breakMsgEl.style.display = "block";
+      tasksListEl.classList.add("dimmed");
+    } else {
+      stateEl.classList.add("lbrk");
+      stateEl.textContent = `🌴 Long break (${POMO_LONG_BREAK} min)`;
+      breakMsgEl.innerHTML = `<b>🌴 Long break</b> — you earned it. Stand up, walk away from the screen.`;
+      breakMsgEl.style.display = "block";
+      tasksListEl.classList.add("dimmed");
+    }
+  }
+  function phaseDurationMins(){
+    if (!pomoOn) return totalMins;
+    if (phase === "work") return POMO_WORK;
+    if (phase === "break") return POMO_BREAK;
+    return POMO_LONG_BREAK;
   }
   function tick(){
     if (!endsAt) return;
@@ -7721,26 +8194,72 @@ function renderFocusMode(today, slotIdx){
     timerEl.textContent = fmt(left);
     timerEl.classList.toggle("warning", left < 5*60*1000 && left > 0);
     if (left <= 0){
-      timerEl.classList.remove("running","warning"); timerEl.classList.add("done");
-      timerEl.textContent = "0:00 — done!";
       clearInterval(_focusTimer); _focusTimer = null;
-      ding();
-      toast("⏰ Slot complete. Take a 5-min break.");
+      timerEl.classList.remove("running","warning"); timerEl.classList.add("done");
+      timerEl.textContent = "0:00";
+      if (!pomoOn){
+        timerEl.textContent = "0:00 — done!";
+        ding();
+        toast("⏰ Slot complete. Take a 5-min break.");
+        return;
+      }
+      // Pomodoro: advance phase
+      if (phase === "work"){
+        cyclesDone += 1;
+        ding();
+        if (cyclesDone >= POMO_CYCLES_BEFORE_LONG){
+          phase = "longbreak";
+          toast(`🌴 ${cyclesDone} cycles done — long break (${POMO_LONG_BREAK} min) starting.`);
+        } else {
+          phase = "break";
+          toast(`☕ Cycle ${cyclesDone} done — ${POMO_BREAK}-min break starting.`);
+        }
+        currentDurationMins = phaseDurationMins();
+        updatePomoUI();
+        // Auto-advance into break
+        endsAt = Date.now() + currentDurationMins * 60 * 1000;
+        _focusTimer = setInterval(tick, 500);
+        timerEl.classList.add("running"); timerEl.classList.remove("done");
+        tick();
+      } else {
+        // break or longbreak finished → ring + notify and pause until user clicks Start
+        ding();
+        if (phase === "longbreak"){
+          cyclesDone = 0; // start a fresh round of 4
+          toast("🔔 Long break done. Click ▶ Start when you're ready for the next work block.");
+        } else {
+          toast("🔔 Break done. Click ▶ Start when you're ready for the next work block.");
+        }
+        try {
+          if (typeof Notification !== "undefined" && Notification.permission === "granted"){
+            new Notification("Break done", { body: "Click ▶ Start when you're ready for the next work block." });
+          } else if (typeof Notification !== "undefined" && Notification.permission === "default"){
+            Notification.requestPermission();
+          }
+        } catch(_) {}
+        // Set up next work block but DO NOT auto-start
+        phase = "work";
+        currentDurationMins = phaseDurationMins();
+        endsAt = null;
+        _pausedAt = null;
+        timerEl.textContent = `${currentDurationMins}:00`;
+        updatePomoUI();
+      }
     }
   }
   function start(){
     if (_focusTimer) return;
     if (!endsAt){
-      endsAt = Date.now() + totalMins * 60 * 1000;
-    } else {
+      endsAt = Date.now() + currentDurationMins * 60 * 1000;
+    } else if (_pausedAt){
       // resume from paused
       endsAt = Date.now() + (endsAt - _pausedAt);
+      _pausedAt = null;
     }
     _focusTimer = setInterval(tick, 500);
     timerEl.classList.add("running"); timerEl.classList.remove("done");
     tick();
   }
-  let _pausedAt = null;
   function pause(){
     if (!_focusTimer) return;
     clearInterval(_focusTimer); _focusTimer = null;
@@ -7748,13 +8267,30 @@ function renderFocusMode(today, slotIdx){
     timerEl.classList.remove("running");
   }
   function reset(){
-    pause(); endsAt = null;
+    pause(); endsAt = null; _pausedAt = null;
+    if (pomoOn){
+      phase = "work";
+      cyclesDone = 0;
+      currentDurationMins = POMO_WORK;
+      updatePomoUI();
+    } else {
+      currentDurationMins = totalMins;
+    }
     timerEl.classList.remove("running","warning","done");
-    timerEl.textContent = `${totalMins}:00`;
+    timerEl.textContent = `${currentDurationMins}:00`;
   }
+  // Initial UI sync
+  updatePomoUI();
+
   overlay.querySelector("[data-focus-action='start']").addEventListener("click", start);
   overlay.querySelector("[data-focus-action='pause']").addEventListener("click", pause);
   overlay.querySelector("[data-focus-action='reset']").addEventListener("click", reset);
+  overlay.querySelector("[data-focus-action='pomo']").addEventListener("click", () => {
+    settings.pomodoro = !settings.pomodoro; saveSettings();
+    // Cleanly re-render this slot under the new setting (also resets cycles/timer)
+    if (_focusTimer){ clearInterval(_focusTimer); _focusTimer = null; }
+    renderFocusMode(today, slotIdx);
+  });
   overlay.querySelector("[data-focus-action='prev']").addEventListener("click", () => {
     pause(); if (slotIdx > 0) renderFocusMode(today, slotIdx - 1);
   });
@@ -7831,11 +8367,23 @@ function renderSchedule(filter){
   const cont = document.getElementById("view-schedule");
   cont.innerHTML = "";
 
+  // First-run tip banner (only on Today view, before any progress, until dismissed)
+  const isFirstRun = Object.keys(state).length === 0 && !settings.dismissedFirstRunTip;
+  if (filter === "today" && isFirstRun){
+    cont.insertAdjacentHTML("beforeend", `<div class="first-run-tip" id="first-run-tip">
+      <button class="dismiss" id="first-run-dismiss" title="Got it, hide this." aria-label="Dismiss tip">✕</button>
+      👋 <b>First time here?</b> Tip: tap the <b>⏵ Resume</b> button up top to jump
+      to your next task. Press <span class="kbd">?</span> for the keyboard-shortcut sheet.
+    </div>`);
+  }
+
   // Standup card (only in Today view)
   if (filter === "today") cont.insertAdjacentHTML("beforeend", renderStandup());
 
   // Heatmap + quote always at top
   cont.insertAdjacentHTML("beforeend", renderHeatmap());
+  // Lay out the SVG journey path (positions vehicle, checkpoint dots, week ticks)
+  if (typeof layoutJourneySVG === "function") layoutJourneySVG();
   const [q, who] = quoteOfDay();
   cont.insertAdjacentHTML("beforeend", `<div class="quote">${q}<span class="who">— ${who}</span></div>`);
 
@@ -7881,7 +8429,7 @@ function renderSchedule(filter){
     cont.insertAdjacentHTML("beforeend",
       `<div class="day ${open} ${completedCls}" data-day="${d.day}">
          <div class="day-head">
-           <div class="day-head-left"><button class="day-copy" data-copy-day="${d.day}" title="Copy this day's plan as plain text">📋 Copy</button><span class="day-num">DAY ${String(d.day).padStart(2,"0")}</span><span class="day-title">${d.dateLabel || (d.dow + " ·")} · ${d.title}${todayMarker}</span></div>
+           <div class="day-head-left"><button class="day-copy" data-copy-day="${d.day}" title="Copy today's plan to clipboard as plain text.">📋 Copy</button><span class="day-num">DAY ${String(d.day).padStart(2,"0")}</span><span class="day-title">${d.dateLabel || (d.dow + " ·")} · ${d.title}${todayMarker}</span></div>
            <div class="day-pct"><b>${doneTasks}</b>/${totalTasks} · ${pct}%</div>
          </div>
          <div class="day-body">${bodyHTML}</div>
@@ -7892,6 +8440,13 @@ function renderSchedule(filter){
 }
 
 function wireScheduleInteractions(cont){
+  // First-run tip dismiss (only present on first render of Today view before any progress)
+  const dismissBtn = cont.querySelector("#first-run-dismiss");
+  if (dismissBtn) dismissBtn.addEventListener("click", () => {
+    settings.dismissedFirstRunTip = true; saveSettings();
+    const banner = cont.querySelector("#first-run-tip");
+    if (banner) banner.remove();
+  });
   cont.querySelectorAll(".day-head").forEach(h => h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
   cont.querySelectorAll(".cell, .cal-cell.has-day").forEach(c => c.addEventListener("click", () => {
     const targetDay = c.dataset.day;
@@ -7954,13 +8509,20 @@ function wireScheduleInteractions(cont){
       const cur = getNote(id);
       const ts = cur.timestamps || [];
       if (cb.checked && ts.length === 0) ts.push(Date.now());
-      setNote(id, {revisit: cb.checked, timestamps: ts});
+      if (cb.checked){
+        // Newly flagged → seed SM-2 defaults; if previously flagged & cleared,
+        // start a fresh schedule from now.
+        const initialTs = ts[0] || Date.now();
+        setNote(id, {revisit: true, timestamps: ts, ...sm2Defaults(initialTs)});
+      } else {
+        setNote(id, {revisit: false, timestamps: ts});
+      }
       const tog = cb.closest("li").querySelector(".note-toggle");
       if (tog){
         tog.classList.toggle("has-note", cb.checked || !!cur.text);
         tog.textContent = cb.checked ? "🔁" : (cur.text ? "📝" : "+");
       }
-      toast(cb.checked ? "📝 Added to mistake log (3-day, 7-day, 21-day spaced rep)" : "Removed from mistake log");
+      toast(cb.checked ? "📝 Added to mistake log · revisit in 3 days (SM-2 lite)" : "Removed from mistake log");
     });
   });
   cont.querySelectorAll(".timer-btn").forEach(b => b.addEventListener("click", e => {
@@ -8178,7 +8740,7 @@ function openConceptModal(cid){
       const [slug, diff, premium] = meta;
       const bclass = premium ? "b-P" : ("b-"+diff);
       const dlabel = premium ? `${diff}·P` : diff;
-      return `<li><a href="${LC(slug)}" target="_blank" rel="noopener">${name}</a><span class="badge ${bclass}">${dlabel}</span></li>`;
+      return `<li><a href="${LC(slug)}" target="_blank" rel="noopener">${name}</a><span class="badge ${bclass}" title="${premium ? 'Premium (LeetCode subscription required)' : (diff === 'E' ? 'Easy' : diff === 'M' ? 'Medium' : diff === 'H' ? 'Hard' : diff)}">${dlabel}</span></li>`;
     }).filter(Boolean).join("");
   const related = (c.related||[]).map(rid => {
     const rc = CONCEPTS[rid]; if (!rc) return "";
@@ -8190,10 +8752,10 @@ function openConceptModal(cid){
   const animBlock = hasAnim ? `<div class="concept-modal-section">
     <h5>Animation</h5>
     <div class="anim-controls">
-      <button data-anim-action="prev">◀ Prev</button>
-      <button data-anim-action="play">▶ Play</button>
-      <button data-anim-action="next">Next ▶</button>
-      <button data-anim-action="reset">↺ Reset</button>
+      <button data-anim-action="prev" title="Previous step.">◀ Prev</button>
+      <button data-anim-action="play" title="Auto-advance steps.">▶ Play</button>
+      <button data-anim-action="next" title="Next step.">Next ▶</button>
+      <button data-anim-action="reset" title="Reset animation to first step.">↺ Reset</button>
       <span class="step-info" data-anim-step>0 / 0</span>
     </div>
     <div class="anim-box" data-anim="${cid}"></div>
@@ -8201,7 +8763,7 @@ function openConceptModal(cid){
   </div>` : "";
 
   showModal(`
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🧠 ${c.name}</h2>
     <p style="color:var(--fg);font-size:14px;line-height:1.55">${c.summary}</p>
     <div class="concept-modal-section">
@@ -8253,7 +8815,10 @@ function initAnimation(cid){
   function pauseAuto(){ if (_animTimer) clearInterval(_animTimer); _animTimer = null; setBtnLabel("▶ Play"); }
   function setBtnLabel(label){
     const b = box.parentElement.querySelector("[data-anim-action='play']");
-    if (b) b.textContent = label;
+    if (b){
+      b.textContent = label;
+      b.setAttribute("title", label.includes("Pause") ? "Pause auto-advance." : "Auto-advance steps.");
+    }
   }
 
   document.querySelector("[data-anim-action='prev']").onclick = () => { pauseAuto(); step = Math.max(0, step - 1); render(); };
@@ -8494,8 +9059,16 @@ function checkAchievements(){
 function renderAchievements(){
   const cont = document.getElementById("view-achievements");
   const earned = ACHIEVEMENTS.filter(a => a.test()).length;
-  let html = `<div class="panel"><h2>🏆 Achievements · ${earned}/${ACHIEVEMENTS.length}</h2>
-    <div class="achievements-grid">`;
+  let html = `<div class="panel"><h2>🏆 Achievements · ${earned}/${ACHIEVEMENTS.length}</h2>`;
+  if (earned === 0){
+    html += `<div class="empty-state">
+      <div class="ico">🏆</div>
+      <h3>No badges yet — your first one is waiting</h3>
+      <p>Complete your first day to unlock <b>'First Step'</b> 🎉</p>
+      <p style="font-size:12px;opacity:.8">Check off every task in any single day on the Schedule tab. That's it.</p>
+    </div>`;
+  }
+  html += `<div class="achievements-grid">`;
   ACHIEVEMENTS.forEach(a => {
     const ok = a.test();
     html += `<div class="achv ${ok?'earned':''}">
@@ -8509,10 +9082,11 @@ function renderAchievements(){
 }
 
 // ====================================================================
-// MISTAKE LOG (spaced repetition: 3, 7, 21 days)
+// MISTAKE LOG (SM-2 lite spaced repetition)
 // ====================================================================
 function buildMistakeLog(){
   const items = [];
+  const now = Date.now();
   Object.entries(notes).forEach(([id, n]) => {
     if (!n.revisit) return;
     // find task name
@@ -8523,20 +9097,28 @@ function buildMistakeLog(){
     if (!d) return;
     const t = d.slots[si]?.tasks[ti];
     if (!t) return;
-    const ts = (n.timestamps && n.timestamps[0]) || Date.now();
-    const ageDays = (Date.now() - ts) / 86400000;
-    const dueAt = (() => {
-      // compute next due based on intervals 3, 7, 21
-      if (ageDays < 3) return 3 - ageDays;
-      if (ageDays < 7) return 7 - ageDays;
-      if (ageDays < 21) return 21 - ageDays;
-      return 0;
-    })();
+    // Lazy-migrate to SM-2 defaults if missing
+    const sm2 = ensureSM2(id);
+    const nextDueAt = sm2.nextDueAt;
+    const msUntilDue = nextDueAt - now;
+    // dueAt convention (preserved): 0 = overdue, <1 = due within 24h, >=1 = future days
+    let dueAt;
+    if (msUntilDue <= 0) dueAt = 0;
+    else if (msUntilDue < DAY_MS) dueAt = msUntilDue / DAY_MS; // < 1
+    else dueAt = msUntilDue / DAY_MS;
+    const ts = (n.timestamps && n.timestamps[0]) || nextDueAt - sm2.intervalDays * DAY_MS;
+    const ageDays = (now - ts) / DAY_MS;
     const label = t.names ? t.names.join(", ") : (t.text || "(task)");
-    items.push({ id, day, label, type: t.type, note: n.text || "", ts, dueAt, ageDays });
+    items.push({
+      id, day, label, type: t.type, note: n.text || "",
+      ts, dueAt, ageDays, nextDueAt,
+      easeFactor: sm2.easeFactor,
+      repetitions: sm2.repetitions,
+      intervalDays: sm2.intervalDays
+    });
   });
-  // sort: overdue first
-  items.sort((a,b) => a.dueAt - b.dueAt);
+  // sort: most overdue first, then nearest-due
+  items.sort((a,b) => a.nextDueAt - b.nextDueAt);
   return items;
 }
 
@@ -8544,22 +9126,59 @@ function renderMistakes(){
   const cont = document.getElementById("view-mistakes");
   const items = buildMistakeLog();
   let html = `<div class="panel"><h2>📝 Mistake Log · ${items.length} item${items.length===1?'':'s'}</h2>
-    <p style="color:var(--muted);font-size:12px;margin-top:0">Spaced repetition: re-solve at <b>3-day</b>, <b>7-day</b>, <b>21-day</b> intervals. Mark a task with 🔁 in the schedule to add it here.</p>`;
+    <p style="color:var(--muted);font-size:12px;margin-top:0">Spaced repetition (SM-2 lite): intervals grow on <b>✓ Got it</b>, reset on <b>🔁 Still struggling</b>. Mark a task with 🔁 in the schedule to add it here.</p>`;
   if (items.length === 0){
-    html += `<div style="text-align:center;padding:30px;color:var(--muted)">No mistakes logged yet. When a problem stumps you, click the <b>+</b> on its task and check "mark for revisit".</div>`;
+    html += `<div class="empty-state">
+      <div class="ico">📝</div>
+      <h3>📝 No mistakes yet</h3>
+      <p>Look for the <code>📝</code> icon on any DSA task → check <code>☐ revisit</code>.</p>
+      <details>
+        <summary>Why use this?</summary>
+        <div>
+          When you flag a problem, it lands here on an <b>SM-2 lite</b> schedule:
+          first revisit at <b>3 days</b>, then <b>7 days</b>, then growing intervals
+          (capped at 90d) every time you click <b>✓ Got it cleanly</b>. Hit
+          <b>🔁 Still struggling</b> and the interval resets to 3 days. The
+          <b>Stats</b> tab tracks your <b>resolve rate</b>, average ease, and
+          mastered items so you can see the curve flatten over time.
+        </div>
+      </details>
+    </div>`;
   } else {
     items.forEach(i => {
       const dueClass = i.dueAt === 0 ? "overdue" : (i.dueAt < 1 ? "upcoming" : "future");
       const dueLabel = i.dueAt === 0 ? "DUE NOW" : (i.dueAt < 1 ? "Today" : `in ${Math.ceil(i.dueAt)}d`);
+      const ease = (i.easeFactor || 2.5).toFixed(1);
+      const reps = i.repetitions || 0;
+      // hover previews of next-due dates after each action
+      const ifGotPreview = (() => {
+        const r = reps + 1;
+        const ef = Math.min(3.0, (i.easeFactor || 2.5) + 0.1);
+        let interval;
+        if (r === 1) interval = 3;
+        else if (r === 2) interval = 7;
+        else interval = Math.min(90, Math.round((i.intervalDays || 3) * ef));
+        return `next due in ${interval}d (ease ${ef.toFixed(1)})`;
+      })();
+      const ifStrugPreview = (() => {
+        const ef = Math.max(1.3, (i.easeFactor || 2.5) - 0.2);
+        return `next due in 3d (ease ${ef.toFixed(1)})`;
+      })();
       html += `<div class="mistake-row">
         <div class="due ${dueClass}">${dueLabel}</div>
         <div class="body">
-          <div class="name">${i.label} <span style="color:var(--muted);font-size:11px">· Day ${i.day} · ${i.type.toUpperCase()}</span></div>
+          <div class="name">${i.label}
+            <span style="color:var(--muted);font-size:11px">· Day ${i.day} · ${i.type.toUpperCase()}</span>
+            <span class="ease-badge" title="Ease factor (SM-2). Higher = longer intervals.">ease ${ease}</span>
+            <span class="reps-badge" title="Successful 'got it' reviews.">${reps} rep${reps===1?'':'s'}</span>
+          </div>
           ${i.note ? `<div class="note">${i.note}</div>` : ""}
         </div>
         <div class="actions">
+          <button class="sm2-got" data-sm2-got="${i.id}" title="${ifGotPreview}">✓ Got it</button>
+          <button class="sm2-strug" data-sm2-strug="${i.id}" title="${ifStrugPreview}">🔁 Still struggling</button>
           <button data-jump="${i.id}">↗ Jump</button>
-          <button data-resolve="${i.id}">✓ Resolved</button>
+          <button class="sm2-done" data-resolve="${i.id}" title="Stop scheduling this — fully done.">Done forever</button>
         </div>
       </div>`;
     });
@@ -8577,6 +9196,16 @@ function renderMistakes(){
       const el = document.querySelector(`.day[data-day='${day}']`);
       if (el){ el.classList.add("open"); el.scrollIntoView({behavior:"smooth", block:"center"}); }
     }, 100);
+  }));
+  cont.querySelectorAll("[data-sm2-got]").forEach(b => b.addEventListener("click", () => {
+    sm2GotIt(b.dataset.sm2Got);
+    renderMistakes();
+    toast("✓ Got it · interval extended");
+  }));
+  cont.querySelectorAll("[data-sm2-strug]").forEach(b => b.addEventListener("click", () => {
+    sm2Struggling(b.dataset.sm2Strug);
+    renderMistakes();
+    toast("🔁 Reset to 3 days · ease lowered");
   }));
   cont.querySelectorAll("[data-resolve]").forEach(b => b.addEventListener("click", () => {
     const id = b.dataset.resolve;
@@ -8781,6 +9410,304 @@ document.getElementById("import-file").addEventListener("change", e => {
 });
 
 // ====================================================================
+// CLOUD SYNC via GitHub Gist (private, optional, AES-GCM at rest)
+// ====================================================================
+// All sync state lives in `settings` so it round-trips with import/export
+// (settings.gistPat, gistId, gistPassphrase, gistAutoSync, gistLastSync).
+// Auto-sync is push-only and debounced. We never auto-pull (avoids surprise
+// data loss). PAT is stored in localStorage just like the rest of progress.
+const GIST_FILE = "tracker.json";
+const GIST_DESC = "Amazon SDE Tracker — progress sync";
+
+function syncSnapshot(){
+  // Mirror the export-button payload + extras (solveTimes, projSteps).
+  return {
+    state, notes, achvState, settings,
+    solveTimes, projSteps,
+    _v: 1,
+    _ts: Date.now()
+  };
+}
+function applySyncPayload(data){
+  if (!data || typeof data !== "object") throw new Error("Payload is not an object");
+  // Validate shape — never trash local data on a malformed pull.
+  const allowed = ["state","notes","achvState","settings","solveTimes","projSteps","_v","_ts"];
+  const keys = Object.keys(data);
+  if (!keys.some(k => allowed.includes(k))) throw new Error("Payload has no recognized keys");
+  if (data.state && typeof data.state === "object") Object.assign(state, data.state);
+  if (data.notes && typeof data.notes === "object") Object.assign(notes, data.notes);
+  if (data.achvState && typeof data.achvState === "object") Object.assign(achvState, data.achvState);
+  if (data.settings && typeof data.settings === "object"){
+    // Don't let a pulled passphrase silently lock the local user out — preserve
+    // local sync credentials if the pulled side is missing them.
+    const localCreds = {
+      gistPat: settings.gistPat,
+      gistId: settings.gistId,
+      gistPassphrase: settings.gistPassphrase,
+      gistAutoSync: settings.gistAutoSync,
+      gistLastSync: settings.gistLastSync
+    };
+    Object.assign(settings, data.settings);
+    Object.entries(localCreds).forEach(([k, v]) => {
+      if (v !== undefined && (settings[k] === undefined || settings[k] === "")) settings[k] = v;
+    });
+  }
+  if (data.solveTimes && typeof data.solveTimes === "object") Object.assign(solveTimes, data.solveTimes);
+  if (data.projSteps && typeof data.projSteps === "object") Object.assign(projSteps, data.projSteps);
+  save(); saveNotes(); saveSettings(); saveTimes(); saveProj();
+  localStorage.setItem(ACHV_KEY, JSON.stringify(achvState));
+  applyTheme();
+}
+
+// ── Web Crypto helpers (AES-GCM with PBKDF2-derived key) ──
+function _hex(buf){
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+function _unhex(s){
+  const out = new Uint8Array(s.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(s.substr(i*2, 2), 16);
+  return out;
+}
+async function _deriveKey(passphrase, salt){
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey("raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt","decrypt"]
+  );
+}
+async function gistEncrypt(plaintext, passphrase){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await _deriveKey(passphrase, salt);
+  const enc = new TextEncoder();
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(plaintext));
+  return JSON.stringify({ _enc: "aes-gcm-pbkdf2-100k", salt: _hex(salt), iv: _hex(iv), ciphertext: _hex(ct) });
+}
+async function gistDecrypt(payloadStr, passphrase){
+  let p;
+  try { p = JSON.parse(payloadStr); } catch(_) { throw new Error("Cloud payload isn't valid JSON"); }
+  if (!p || !p._enc) throw new Error("Cloud payload isn't encrypted (no passphrase needed)");
+  if (!p.salt || !p.iv || !p.ciphertext) throw new Error("Encrypted payload is missing fields");
+  const key = await _deriveKey(passphrase, _unhex(p.salt));
+  let plain;
+  try {
+    plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: _unhex(p.iv) }, key, _unhex(p.ciphertext));
+  } catch(_){
+    throw new Error("Decryption failed — wrong passphrase?");
+  }
+  return new TextDecoder().decode(plain);
+}
+
+// ── GitHub API wrappers ──
+async function _gistFetch(path, opts){
+  const pat = settings.gistPat;
+  if (!pat) throw new Error("No PAT configured");
+  const headers = Object.assign({
+    "Authorization": "Bearer " + pat,
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  }, (opts && opts.headers) || {});
+  if (opts && opts.body) headers["Content-Type"] = "application/json";
+  let res;
+  try {
+    res = await fetch("https://api.github.com" + path, Object.assign({}, opts, { headers }));
+  } catch(err){
+    throw new Error("Network error: " + (err && err.message ? err.message : "request failed"));
+  }
+  if (res.status === 401) throw new Error("Token invalid. Regenerate with `gist` scope.");
+  if (res.status === 404) throw new Error("Gist gone. Click Push to create a new one.");
+  if (!res.ok){
+    let detail = "";
+    try { detail = (await res.json()).message || ""; } catch(_) {}
+    throw new Error(`GitHub API error ${res.status}${detail ? ": " + detail : ""}`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+async function gistTestConnection(){
+  // /user is the cheapest authenticated endpoint
+  const u = await _gistFetch("/user", { method: "GET" });
+  return u && u.login;
+}
+async function gistPush(){
+  const snap = syncSnapshot();
+  let content = JSON.stringify(snap);
+  if (settings.gistPassphrase){
+    content = await gistEncrypt(content, settings.gistPassphrase);
+  }
+  const body = JSON.stringify({
+    description: GIST_DESC,
+    public: false,
+    files: { [GIST_FILE]: { content } }
+  });
+  let res;
+  if (settings.gistId){
+    res = await _gistFetch("/gists/" + encodeURIComponent(settings.gistId), { method: "PATCH", body });
+  } else {
+    res = await _gistFetch("/gists", { method: "POST", body });
+    if (res && res.id) settings.gistId = res.id;
+  }
+  settings.gistLastSync = Date.now();
+  saveSettings();
+  return res;
+}
+async function gistPull(){
+  if (!settings.gistId) throw new Error("No gist ID. Push first to create one.");
+  const res = await _gistFetch("/gists/" + encodeURIComponent(settings.gistId), { method: "GET" });
+  const file = res && res.files && res.files[GIST_FILE];
+  if (!file || typeof file.content !== "string") throw new Error(`Gist is missing the ${GIST_FILE} file.`);
+  let plain = file.content;
+  // Detect encrypted payload by sniffing for the marker.
+  const looksEncrypted = plain.indexOf('"_enc"') !== -1 && plain.indexOf('"ciphertext"') !== -1;
+  if (looksEncrypted){
+    if (!settings.gistPassphrase) throw new Error("Cloud payload is encrypted — set a passphrase first.");
+    plain = await gistDecrypt(plain, settings.gistPassphrase);
+  }
+  let data;
+  try { data = JSON.parse(plain); } catch(_) { throw new Error("Decrypted payload isn't valid JSON"); }
+  applySyncPayload(data);
+  settings.gistLastSync = Date.now();
+  saveSettings();
+  return data;
+}
+
+// ── Auto-sync (push-only, debounced) ──
+let _autoSyncTimer = null;
+function scheduleAutoSync(){
+  if (!settings.gistAutoSync || !settings.gistPat) return;
+  clearTimeout(_autoSyncTimer);
+  _autoSyncTimer = setTimeout(() => {
+    gistPush().catch(err => {
+      // Surface the error quietly — don't spam during typing
+      toast("⚠ Auto-sync failed: " + (err && err.message ? err.message : "unknown"));
+    });
+  }, 30000);
+}
+
+// ── Sync modal UI ──
+function _syncStatusHTML(){
+  if (!settings.gistPat){
+    return `<div class="sync-status warn">Not configured. Add a Personal Access Token below to start.</div>`;
+  }
+  const last = settings.gistLastSync ? new Date(settings.gistLastSync).toLocaleString() : "never";
+  const where = settings.gistId ? `Gist <code style="background:var(--bg);padding:1px 5px;border-radius:3px">${settings.gistId.slice(0,8)}…</code>` : "no gist yet";
+  const enc = settings.gistPassphrase ? " · 🔒 encrypted" : " · ⚠ plain JSON";
+  return `<div class="sync-status ok">Configured · ${where}${enc}<div class="last">Last synced: ${last}</div></div>`;
+}
+function openSyncModal(){
+  showModal(`<button class="close" onclick="closeModal()">✕</button>
+    <h2>🔄 Cloud Sync</h2>
+    <p style="color:var(--muted);font-size:12px;margin-top:0">Sync your tracker across devices via a private GitHub Gist. Push and pull are manual; auto-sync (if enabled) only pushes — never auto-pulls.</p>
+
+    <div id="sync-status-wrap">${_syncStatusHTML()}</div>
+
+    <div class="sync-row">
+      <label for="sync-pat">GitHub Personal Access Token</label>
+      <input type="password" id="sync-pat" placeholder="ghp_… or github_pat_…" value="${(settings.gistPat||"").replace(/"/g,"&quot;")}" autocomplete="off" />
+      <div class="help">Generate at <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a> with only the <code>gist</code> scope. Stored locally; sent only to api.github.com.</div>
+    </div>
+
+    <div class="sync-row">
+      <label for="sync-pass">Encryption passphrase (optional, recommended)</label>
+      <input type="password" id="sync-pass" placeholder="leave empty for plain JSON" value="${(settings.gistPassphrase||"").replace(/"/g,"&quot;")}" autocomplete="off" />
+      <div class="help">If set, your payload is encrypted with AES-GCM (PBKDF2, 100k iterations, SHA-256, 16-byte salt) before upload.</div>
+    </div>
+
+    <div class="sync-toggle">
+      <input type="checkbox" id="sync-auto" ${settings.gistAutoSync ? 'checked' : ''} />
+      <label for="sync-auto">Auto-push 30 seconds after changes (debounced). <span style="color:var(--muted)">Never auto-pulls.</span></label>
+    </div>
+
+    <div class="sync-actions">
+      <button id="sync-test">🔌 Test connection</button>
+      <button class="primary" id="sync-push">⬆ Push to cloud</button>
+      <button id="sync-pull">⬇ Pull from cloud</button>
+      <button class="danger" id="sync-clear">Clear sync settings</button>
+    </div>
+
+    <div class="sync-notes">
+      <b>Security notes</b><br>
+      • Your PAT lives in localStorage (same place as the rest of your progress). Anyone with access to this browser profile can read it.<br>
+      • On a shared computer, click <b>Clear sync settings</b> when you're done.<br>
+      • A passphrase is recommended — without it, your payload is plain JSON inside a private gist.
+    </div>`);
+
+  // Helpers to stamp status updates without rebuilding the whole modal
+  const wrap = document.getElementById("sync-status-wrap");
+  const setStatus = (cls, msg, last) => {
+    const lastLine = last ? `<div class="last">${last}</div>` : "";
+    wrap.innerHTML = `<div class="sync-status ${cls}">${msg}${lastLine}</div>`;
+  };
+
+  const patEl = document.getElementById("sync-pat");
+  const passEl = document.getElementById("sync-pass");
+  const autoEl = document.getElementById("sync-auto");
+  const persistInputs = () => {
+    settings.gistPat = patEl.value.trim();
+    settings.gistPassphrase = passEl.value;
+    settings.gistAutoSync = autoEl.checked;
+    saveSettings();
+  };
+  patEl.addEventListener("input", persistInputs);
+  passEl.addEventListener("input", persistInputs);
+  autoEl.addEventListener("change", persistInputs);
+
+  document.getElementById("sync-test").addEventListener("click", async () => {
+    persistInputs();
+    setStatus("busy", "🔌 Testing connection…");
+    try {
+      const login = await gistTestConnection();
+      setStatus("ok", `✓ Connected as <b>${login}</b>${settings.gistId ? "" : " · no gist yet — Push to create"}`);
+    } catch(err){
+      setStatus("err", "❌ " + (err && err.message ? err.message : "Connection failed"));
+    }
+  });
+  document.getElementById("sync-push").addEventListener("click", async () => {
+    persistInputs();
+    if (!settings.gistPat){ setStatus("err", "❌ Add a PAT first."); return; }
+    setStatus("busy", "⬆ Pushing to cloud…");
+    try {
+      await gistPush();
+      wrap.innerHTML = _syncStatusHTML();
+      toast("⬆ Pushed to cloud");
+    } catch(err){
+      setStatus("err", "❌ " + (err && err.message ? err.message : "Push failed"));
+    }
+  });
+  document.getElementById("sync-pull").addEventListener("click", async () => {
+    persistInputs();
+    if (!settings.gistPat){ setStatus("err", "❌ Add a PAT first."); return; }
+    if (!confirm("Pull from cloud will OVERWRITE your local progress with the cloud copy. Continue?")) return;
+    setStatus("busy", "⬇ Pulling from cloud…");
+    try {
+      await gistPull();
+      wrap.innerHTML = _syncStatusHTML();
+      // Re-render everything so the new state is visible
+      renderSchedule(settings.mode);
+      updateStats();
+      toast("⬇ Pulled from cloud");
+    } catch(err){
+      setStatus("err", "❌ " + (err && err.message ? err.message : "Pull failed"));
+    }
+  });
+  document.getElementById("sync-clear").addEventListener("click", () => {
+    if (!confirm("Clear all sync settings (PAT, gist ID, passphrase, auto-sync flag)? Your local progress is untouched.")) return;
+    delete settings.gistPat;
+    delete settings.gistId;
+    delete settings.gistPassphrase;
+    delete settings.gistLastSync;
+    settings.gistAutoSync = false;
+    saveSettings();
+    closeModal();
+    toast("🧹 Sync settings cleared");
+  });
+}
+document.getElementById("sync-btn").addEventListener("click", openSyncModal);
+
+// ====================================================================
 // VIEW MODE (today / all)
 // ====================================================================
 function setViewMode(mode){
@@ -8814,9 +9741,13 @@ document.addEventListener("keydown", e => {
         <tr><td><span class="kbd">1</span>–<span class="kbd">8</span></td><td>Jump to week 1–8</td></tr>
         <tr><td><span class="kbd">a</span></td><td>All weeks view</td></tr>
         <tr><td><span class="kbd">d</span></td><td>Today view</td></tr>
+        <tr><td><span class="kbd">←</span> / <span class="kbd">→</span></td><td>Navigate guided tour (when active)</td></tr>
         <tr><td><span class="kbd">?</span></td><td>This help</td></tr>
-        <tr><td><span class="kbd">Esc</span></td><td>Close modal</td></tr>
+        <tr><td><span class="kbd">Esc</span></td><td>Close modal / exit tour</td></tr>
       </table>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="icon primary" onclick="closeModal();startTour()" style="background:var(--grad-1);color:#000;border:0;font-weight:700;padding:6px 14px;border-radius:99px;cursor:pointer">🗺 Replay tour</button>
+      </div>
     `);
   }
   else if (e.key === "Escape") closeModal();
@@ -8893,6 +9824,11 @@ function renderStats(){
   const resolvedCount = Object.values(notes).filter(n => !n.revisit && n.timestamps && n.timestamps.length > 0).length;
   const totalEverFlagged = Object.values(notes).filter(n => n.timestamps && n.timestamps.length > 0).length;
   const resolveRate = totalEverFlagged > 0 ? Math.round(resolvedCount * 100 / totalEverFlagged) : 0;
+  // SM-2 derived: average ease, items mastered (reps >= 3 AND ease >= 2.5)
+  const avgEase = items.length > 0
+    ? (items.reduce((s, i) => s + (i.easeFactor || 2.5), 0) / items.length)
+    : 0;
+  const mastered = items.filter(i => (i.repetitions || 0) >= 3 && (i.easeFactor || 2.5) >= 2.5).length;
 
   // Time tracker stats
   const timeEntries = Object.entries(solveTimes);
@@ -8915,16 +9851,33 @@ function renderStats(){
     .sort((a, b) => b.sec - a.sec)
     .slice(0, 5);
 
-  // (pre-flight tracking removed)
+  // Empty state — nothing tracked yet
+  const nothingTracked = timeEntries.length === 0 && items.length === 0 && totalEverFlagged === 0;
+  if (nothingTracked){
+    cont.innerHTML = `<div class="panel"><h2>📈 Stats</h2>
+      <div class="empty-state">
+        <div class="ico">📈</div>
+        <h3>Nothing to chart yet</h3>
+        <p>Start solving problems to see stats here. Stats include slowest problems, average solve time, and revisit-resolve rate.</p>
+        <div class="example">Tip: hit <code>▶ Time</code> on any DSA task to log time, or flag with <code>🔁</code> to seed the spaced-repetition queue.</div>
+      </div>
+    </div>`;
+    return;
+  }
 
   let html = `<div class="panel"><h2>📈 Stats</h2>
-    <h3>Revisit / Spaced repetition</h3>
+    <h3>Revisit / Spaced repetition (SM-2 lite)</h3>
     <div class="revisit-stats">
       <div class="stat red"><div class="num">${overdue}</div><div class="lbl">Overdue</div></div>
       <div class="stat"><div class="num">${upcoming}</div><div class="lbl">Due Today</div></div>
       <div class="stat green"><div class="num">${resolveRate}%</div><div class="lbl">Resolve Rate</div></div>
     </div>
-    <p style="color:var(--muted);font-size:12px;margin:0">Open the <b>Mistakes</b> tab to clear overdue items. Resolve rate = how many flagged problems you've marked resolved.</p>
+    <div class="revisit-stats" style="margin-top:8px">
+      <div class="stat"><div class="num">${items.length}</div><div class="lbl">In Queue</div></div>
+      <div class="stat"><div class="num">${avgEase ? avgEase.toFixed(2) : "—"}</div><div class="lbl">Avg Ease</div></div>
+      <div class="stat green"><div class="num">${mastered}</div><div class="lbl">Mastered</div></div>
+    </div>
+    <p style="color:var(--muted);font-size:12px;margin:0">Mastered = ≥3 successful reviews and ease ≥ 2.5. Open the <b>Mistakes</b> tab to clear overdue items.</p>
 
     <h3 style="margin-top:18px">Solve-time tracker</h3>
     <div class="revisit-stats">
@@ -9012,7 +9965,7 @@ function openXuGuideModal(){
     return null;
   }
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>📖 Alex Xu — System Design Interview Vol. 1</h2>
     <div class="sd-modal-section">
       <p style="font-size:13px;line-height:1.6">Skim Chapters <b>1, 2, 3</b> first — they're the framework. After that, read each chapter when its topic comes up in your schedule. Tap any in-app card below to see the matching modal.</p>
@@ -9025,7 +9978,7 @@ function openXuGuideModal(){
         <span style="color:var(--muted);font-size:11px;font-family:ui-monospace,monospace">${ch.pages}</span>
       </div>
       <div style="margin-top:4px;font-size:12px;line-height:1.5">${ch.blurb}</div>
-      ${links.length ? `<div style="margin-top:6px;font-size:12px">In-app: ${links.map(l => `<a href="#" class="sd-deeplink" data-sd-deeplink="${l.kind === 'concept' ? 'concept' : 'problem'}:${l.id}" style="color:var(--accent-3)">${l.kind === 'concept' ? '🏗' : '🎯'} ${l.name}</a>`).join(" · ")}</div>` : `<div style="margin-top:6px;font-size:12px;color:var(--muted)"><i>Read for breadth — not directly mapped to an in-app card.</i></div>`}
+      ${links.length ? `<div style="margin-top:6px;font-size:12px">In-app: ${links.map(l => `<a href="#" class="sd-deeplink" data-sd-deeplink="${l.kind === 'concept' ? 'concept' : 'problem'}:${l.id}" style="color:var(--accent-3)" title="${l.kind === 'concept' ? 'Open this System Design concept/problem in-app.' : 'Open this problem in-app.'}">${l.kind === 'concept' ? '🏗' : '🎯'} ${l.name}</a>`).join(" · ")}</div>` : `<div style="margin-top:6px;font-size:12px;color:var(--muted)"><i>Read for breadth — not directly mapped to an in-app card.</i></div>`}
     </div>`;
   });
   showModal(html);
@@ -9043,7 +9996,7 @@ function openSDConceptModal(id){
   const c = SD_CONCEPTS.find(x => x.id === id);
   if (!c) return;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🏗 ${c.name}</h2>
     <div class="sd-modal-section"><p style="font-size:14px;line-height:1.6">${c.summary}</p></div>`;
   if (c.when?.length){
@@ -9089,7 +10042,7 @@ function openSDConceptModal(id){
 function openSDProblemModal(id){  const p = SD_PROBLEMS.find(x => x.id === id);
   if (!p) return;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🏗 ${p.name}</h2>
     <div class="sd-modal-section"><p style="font-size:14px;line-height:1.6">${p.summary}</p></div>`;
   if (p.functional?.length){
@@ -9184,7 +10137,7 @@ function openBEConceptModal(id){
   const c = BE_CONCEPTS.find(x => x.id === id);
   if (!c) return;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🛠 ${c.name}</h2>
     <div class="be-modal-section"><p style="font-size:14px;line-height:1.6">${c.summary}</p></div>`;
   if (c.when?.length){
@@ -9238,7 +10191,7 @@ function openBEProjectModal(id){
   const comp = projectCompletion(id);
   const pct = comp.total ? Math.round(comp.done * 100 / comp.total) : 0;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🛠 ${p.name}</h2>
     <div class="be-modal-section"><p style="font-size:14px;line-height:1.6">${p.summary}</p></div>
     <div class="be-modal-section"><h4>Stack</h4><p style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">${p.stack}</p></div>
@@ -9329,7 +10282,7 @@ function openLXConceptModal(id){
   const c = LX_CONCEPTS.find(x => x.id === id);
   if (!c) return;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🐧 ${c.name}</h2>
     <div class="lx-modal-section"><p style="font-size:14px;line-height:1.6">${c.summary}</p></div>`;
   if (c.when?.length){
@@ -9370,7 +10323,7 @@ function openLXLabModal(id){
   const lab = LX_LABS.find(x => x.id === id);
   if (!lab) return;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🐧 ${lab.name}</h2>
     <div class="lx-modal-section">
       <table class="lx-cmd-table">
@@ -9439,7 +10392,7 @@ function openMockPlaybookModal(id){
   const m = MOCK_PLAYBOOKS.find(x => x.id === id);
   if (!m) return;
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🎙 ${m.title}</h2>
     <div class="mock-modal-section"><p style="font-size:14px;line-height:1.6">${m.summary}</p>
       <p style="margin-top:6px;font-size:12px;color:var(--muted);font-family:ui-monospace,monospace">Duration: ${m.duration}</p></div>
@@ -9461,13 +10414,13 @@ function openMockPrepModal(id){
   if (!p) return;
   const pb = MOCK_PLAYBOOKS.find(x => x.id === p.playbook);
   let html = `
-    <button class="close" onclick="closeModal()" aria-label="Close">✕</button>
+    <button class="close" onclick="closeModal()" aria-label="Close" title="Close this dialog.">✕</button>
     <h2>🎙 ${p.label}</h2>
     <div class="mock-modal-section"><p style="font-size:13px;color:var(--muted)">Day ${p.day} · Week ${p.week}${SCHEDULE.find(d=>d.day===p.day)?.dateLabel ? ` · ${SCHEDULE.find(d=>d.day===p.day).dateLabel}` : ""}</p></div>
     <div class="mock-modal-section"><h4>Focus areas</h4><ul style="padding-left:18px;font-size:13px;line-height:1.6">${p.focus.map(x => `<li>${x}</li>`).join("")}</ul></div>
     <div class="mock-modal-section"><h4>Likely problems</h4><ul style="padding-left:18px;font-size:13px;line-height:1.6">${p.likelyProblems.map(x => `<li>${x}</li>`).join("")}</ul></div>
     <div class="mock-modal-section"><h4>5-minute prep</h4><div class="sd-example">${p.prep}</div></div>
-    ${pb ? `<div class="mock-modal-section"><h4>Use this playbook</h4><a href="#" class="sd-deeplink" data-sd-deeplink="mockplaybook:${pb.id}">📖 ${pb.title}</a></div>` : ""}
+    ${pb ? `<div class="mock-modal-section"><h4>Use this playbook</h4><a href="#" class="sd-deeplink" data-sd-deeplink="mockplaybook:${pb.id}" title="Open this Mock playbook in-app.">📖 ${pb.title}</a></div>` : ""}
   `;
   showModal(html);
   document.querySelectorAll("#modal .sd-deeplink").forEach(a => a.addEventListener("click", e => {
@@ -9555,15 +10508,15 @@ function renderGrind(){
       // per-problem prep card on Grind 169 rows (collapsed by default)
       const prep = (typeof prepLookup === "function") ? prepLookup(n) : null;
       const prepBlock = prep ? `<div class="prep-wrap">${renderPrepCard(`grind::${normalizePrepKey(n)}`, prep)}</div>` : "";
-      return `<li><input type=checkbox ${checked} data-id="${id}"><span class="task-text"><a href="${LC(slug)}" target="_blank" rel="noopener">${n}</a><span class="badge ${cls}">${lbl}</span>${concepts ? `<span class="concepts">${concepts}</span>` : ""}${prepBlock}</span></li>`;
+      return `<li><input type=checkbox ${checked} data-id="${id}"><span class="task-text"><a href="${LC(slug)}" target="_blank" rel="noopener">${n}</a><span class="badge ${cls}" title="${prem ? 'Premium (LeetCode subscription required)' : (diff === 'E' ? 'Easy' : diff === 'M' ? 'Medium' : diff === 'H' ? 'Hard' : diff)}">${lbl}</span>${concepts ? `<span class="concepts">${concepts}</span>` : ""}${prepBlock}</span></li>`;
     }).join("");
   cont.innerHTML = `<div class="panel"><h2>Grind 169 · Quick Index</h2>
     <div class="stats" style="margin-bottom:10px">
       <span>Click any problem to open on LeetCode</span>
-      <span><span class="badge b-E">E</span>Easy</span>
-      <span><span class="badge b-M">M</span>Medium</span>
-      <span><span class="badge b-H">H</span>Hard</span>
-      <span><span class="badge b-P">P</span>Premium</span>
+      <span><span class="badge b-E" title="Easy">E</span>Easy</span>
+      <span><span class="badge b-M" title="Medium">M</span>Medium</span>
+      <span><span class="badge b-H" title="Hard">H</span>Hard</span>
+      <span><span class="badge b-P" title="Premium (LeetCode subscription required)">P</span>Premium</span>
     </div>
     <ul class="tasks">${rows}</ul></div>`;
   cont.querySelectorAll("input[type=checkbox]").forEach(cb => {
@@ -9722,6 +10675,291 @@ window.__listMissingPrep = function(){
     total: union.size
   };
 };
+
+// ====================================================================
+// GUIDED TOUR
+// ====================================================================
+// Click-driven walkthrough of the tracker's main features. Auto-launches on
+// first visit (no progress + tour not completed). Re-launchable via the
+// 🗺 Tour button or the keyboard-shortcut modal. Persists completion in
+// settings.tourCompleted.
+const TOUR_STEPS = [
+  {
+    selector: null,
+    title: "👋 Welcome to your Amazon SDE Tracker",
+    body: "60 days, 169 problems, 6 LPs. Let me show you around in 90 seconds. Use <b>← / →</b> to navigate, <b>Esc</b> to skip."
+  },
+  {
+    selector: ".progress-bar",
+    title: "Daily progress at a glance",
+    body: "Your overall progress lives up top. The 🔥 <b>Streak</b> pill counts consecutive active days; <b>⭐ Level</b> + XP gamify completion (1 XP per task, level up every 25)."
+  },
+  {
+    selector: ".tabs",
+    title: "13 tabs, one plan",
+    body: "Schedule, Concepts, System Design, Backend, Linux, Mocks, Cheats, LP Playbook, Achievements, Mistakes, Stats. Click any tab to switch context. The tour will hop between tabs as needed."
+  },
+  {
+    selector: ".view-mode",
+    title: "Today vs. All weeks",
+    body: "<b>Today</b> shows just today's plan with a standup card. <b>All weeks</b> shows every day, scrollable. Press <b>d</b> for Today, <b>a</b> for All."
+  },
+  {
+    selector: "#search",
+    title: "Search anything",
+    body: "Search any problem name, topic, or day number. Press <b>/</b> from anywhere to jump straight here. Hits link directly to the day or concept."
+  },
+  {
+    selector: ".controls",
+    title: "Quick actions live here",
+    body: "<b>⏵ Resume</b> jumps to your next unfinished task. <b>🔄 Sync</b> uploads progress to a private GitHub Gist for cross-device. <b>🖨</b> prints today's plan. <b>🌓</b> cycles dark / light / high-contrast themes."
+  },
+  {
+    viewMode: "today",
+    selector: ".standup",
+    title: "Your daily landing pad",
+    body: "Today's plan, the top concept of the day, a focus-mode button, and your revisit queue. This is where you start every session."
+  },
+  {
+    viewMode: "today",
+    selector: ".journey-svg-wrap",
+    title: "Your 60-day journey",
+    body: "A winding road across all 60 days. Each dot is one of 25 achievements. Hover for a preview, click to jump to the Badges tab and see what unlocks next."
+  },
+  {
+    viewMode: "today",
+    selector: ".day",
+    title: "Day cards",
+    body: "Click any day's header to expand. Slots show estimated minutes; each task has a checkbox and 📝 for notes. The 📋 button copies the day's plan as plain text for offline review.",
+    prep: () => {
+      const d = document.querySelector(".day");
+      if (d) d.classList.add("open");
+    }
+  },
+  {
+    viewMode: "today",
+    selector: ".dsa-extras",
+    title: "Per-problem widgets",
+    body: "Every DSA task has <b>▶ Time</b> (per-problem stopwatch), <b>💡 Why this?</b> (why we picked it for today), and <b>▸ Show prep</b> (a six-field interview prep card with pattern, insight, complexity, follow-up, clarify, edges).",
+    prep: () => {
+      const d = document.querySelector(".day");
+      if (d) d.classList.add("open");
+    }
+  },
+  {
+    tab: "concepts",
+    selector: ".concept-card",
+    title: "Concepts library",
+    body: "30+ algorithm patterns with code, animations, and the problems that use them. Click any 🧠 chip on a DSA task to land here, or browse directly."
+  },
+  {
+    tab: "mocks",
+    selector: ".mock-card",
+    title: "Mock interviews",
+    body: "Six pre-scheduled mocks across the 60 days, each with a prep playbook. Below the playbooks you'll see a per-mock focus card with date, focus areas, and likely problems."
+  },
+  {
+    tab: "mistakes",
+    selector: "#view-mistakes .panel",
+    title: "Spaced repetition",
+    body: "Flag a problem with 🔁 on its task and it shows up here at smart intervals (SM-2). Tap <b>✓ Got it</b> when you nail it (interval grows), <b>🔁 Still struggling</b> to reset to 3 days."
+  },
+  {
+    tab: "stats",
+    selector: ".revisit-stats",
+    title: "Stats & weak spots",
+    body: "Solve-time tracker, slowest problems, average ease factor, and resolve rate. Use it to spot which patterns still trip you up."
+  },
+  {
+    tab: "achievements",
+    selector: "#view-achievements",
+    title: "Badges to chase",
+    body: "25 achievements covering streaks, milestones, and full-track completions. They unlock automatically as you tick tasks off."
+  },
+  {
+    selector: null,
+    title: "🎉 You're all set",
+    body: "Press <b>?</b> anywhere for the full shortcut list. <b>f</b> = focus mode, <b>/</b> = search, <b>j</b>/<b>k</b> = next/prev day, <b>Space</b> = check off task. Now go solve something."
+  }
+];
+
+let _tourIdx = 0;
+let _tourActive = false;
+let _tourResizeHandler = null;
+
+function _tourEl(id){ return document.getElementById(id); }
+
+function startTour(){
+  // Close any open modal first so the tour isn't fighting for z-index
+  const modalBg = document.getElementById("modal-bg");
+  if (modalBg && modalBg.classList.contains("show")) closeModal();
+
+  _tourIdx = 0;
+  _tourActive = true;
+  _tourEl("tour-overlay").classList.add("show");
+  _tourEl("tour-tooltip").classList.add("show");
+
+  if (!_tourResizeHandler){
+    _tourResizeHandler = () => { if (_tourActive) showTourStep(_tourIdx); };
+    window.addEventListener("resize", _tourResizeHandler);
+  }
+  showTourStep(0);
+}
+
+function endTour(completed){
+  _tourActive = false;
+  _tourEl("tour-overlay").classList.remove("show");
+  _tourEl("tour-tooltip").classList.remove("show");
+  _tourEl("tour-spotlight").style.display = "none";
+  _tourEl("tour-backdrop").classList.remove("show");
+  if (_tourResizeHandler){
+    window.removeEventListener("resize", _tourResizeHandler);
+    _tourResizeHandler = null;
+  }
+  if (completed){
+    settings.tourCompleted = true;
+    saveSettings();
+    if (typeof toast === "function") toast("✅ Tour complete · press ? for shortcuts");
+  }
+  _tourIdx = 0;
+}
+
+function showTourStep(i){
+  if (i < 0) i = 0;
+  if (i >= TOUR_STEPS.length){ endTour(true); return; }
+  _tourIdx = i;
+  const step = TOUR_STEPS[i];
+
+  // 1. Switch tab if needed
+  if (step.tab){
+    const btn = document.querySelector(`.tabs button[data-view="${step.tab}"]`);
+    if (btn && !btn.classList.contains("active")) btn.click();
+  }
+  // 2. Switch view mode if needed (Today/All)
+  if (step.viewMode && typeof setViewMode === "function") setViewMode(step.viewMode);
+  // 3. Optional pre-step setup (e.g., open a day card so its inner targets render)
+  if (typeof step.prep === "function"){
+    try { step.prep(); } catch(_){}
+  }
+
+  // 4. Wait for re-render before resolving target
+  requestAnimationFrame(() => {
+    const target = step.selector ? document.querySelector(step.selector) : null;
+    // Skip gracefully if the target is missing (e.g., no .dsa-extras yet)
+    if (step.selector && !target){
+      // Try advancing in the same direction we came from; default forward
+      const next = i + 1;
+      if (next < TOUR_STEPS.length){ showTourStep(next); return; }
+      endTour(true); return;
+    }
+    _positionTour(step, target);
+  });
+}
+
+function _positionTour(step, target){
+  const spot = _tourEl("tour-spotlight");
+  const tip = _tourEl("tour-tooltip");
+  const back = _tourEl("tour-backdrop");
+
+  // Render tooltip body first so size is known
+  const isLast = _tourIdx === TOUR_STEPS.length - 1;
+  tip.innerHTML = `
+    <h3>${step.title}</h3>
+    <p>${step.body}</p>
+    <div class="tour-tooltip-controls">
+      <span class="step-info">${_tourIdx + 1} of ${TOUR_STEPS.length}</span>
+      <span class="tour-skip" data-tour-action="skip">Skip tour</span>
+      <div class="tour-btn-row">
+        ${_tourIdx > 0 ? `<button data-tour-action="prev">← Back</button>` : ""}
+        <button class="primary" data-tour-action="next">${isLast ? "Done ✓" : "Next →"}</button>
+      </div>
+    </div>`;
+
+  // Wire control buttons (avoid inline handlers to keep CSP-friendly)
+  tip.querySelectorAll("[data-tour-action]").forEach(el => {
+    el.addEventListener("click", () => {
+      const a = el.dataset.tourAction;
+      if (a === "skip") endTour(false);
+      else if (a === "prev") showTourStep(_tourIdx - 1);
+      else if (a === "next") showTourStep(_tourIdx + 1);
+    });
+  });
+
+  if (!target){
+    // Centered tooltip; fake backdrop covers full viewport
+    spot.style.display = "none";
+    back.classList.add("show");
+    tip.classList.add("center");
+    tip.style.left = ""; tip.style.top = "";
+    return;
+  }
+
+  // Real spotlight: hide backdrop (spotlight uses huge box-shadow as backdrop)
+  back.classList.remove("show");
+  tip.classList.remove("center");
+
+  target.scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
+  // Wait for scroll to settle before measuring
+  setTimeout(() => {
+    if (!_tourActive) return;
+    const rect = target.getBoundingClientRect();
+    const pad = innerWidth < 720 ? 4 : 8;
+    spot.style.display = "block";
+    spot.style.left = Math.max(0, rect.left - pad) + "px";
+    spot.style.top = Math.max(0, rect.top - pad) + "px";
+    spot.style.width = (rect.width + pad * 2) + "px";
+    spot.style.height = (rect.height + pad * 2) + "px";
+
+    // Place tooltip below the spotlight, fall back to above, then to side
+    const tipRect = tip.getBoundingClientRect();
+    const tipW = Math.max(tipRect.width, 280);
+    const tipH = Math.max(tipRect.height, 120);
+    const margin = 16;
+
+    let tx = rect.left;
+    let ty = rect.bottom + margin;
+
+    if (ty + tipH > innerHeight - margin){
+      // try above
+      const above = rect.top - tipH - margin;
+      if (above >= margin) ty = above;
+      else ty = Math.max(margin, innerHeight - tipH - margin);
+    }
+    if (tx + tipW > innerWidth - margin) tx = innerWidth - tipW - margin;
+    if (tx < margin) tx = margin;
+
+    tip.style.left = tx + "px";
+    tip.style.top = ty + "px";
+  }, 380);
+}
+
+window.startTour = startTour;
+window.endTour = endTour;
+window.showTourStep = showTourStep;
+
+// 🗺 Tour button
+const tourBtn = document.getElementById("tour-btn");
+if (tourBtn) tourBtn.addEventListener("click", () => startTour());
+
+// Keyboard: Esc closes; Arrow keys navigate (only while tour is active)
+document.addEventListener("keydown", e => {
+  if (!_tourActive) return;
+  // Don't hijack typing in inputs (e.g., search box)
+  if (["INPUT","TEXTAREA"].includes(e.target.tagName)) return;
+  if (e.key === "Escape"){ e.preventDefault(); endTour(false); }
+  else if (e.key === "ArrowRight"){ e.preventDefault(); showTourStep(_tourIdx + 1); }
+  else if (e.key === "ArrowLeft"){ e.preventDefault(); if (_tourIdx > 0) showTourStep(_tourIdx - 1); }
+}, true); // capture so we run before other handlers
+
+// Auto-launch on first visit: no progress AND tour not yet completed
+if (!settings.tourCompleted && Object.keys(state).length === 0){
+  setTimeout(() => {
+    // Don't start if a modal opened in the meantime
+    const mb = document.getElementById("modal-bg");
+    if (mb && mb.classList.contains("show")) return;
+    startTour();
+  }, 600);
+}
 </script>
 </body>
 </html>
