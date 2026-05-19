@@ -1545,7 +1545,8 @@ function renderPrepCard(prepId, prep){
           data-prep-toggle="${dataAttr}"
           tabindex="0" role="button"
           aria-expanded="${open}"
-          aria-controls="prep-${idAttr}">${toggleText}</span>
+          aria-controls="prep-${idAttr}"
+          title="Show/hide the per-problem interview prep card (pattern, insight, complexity, follow-up, clarify, edges).">${toggleText}</span>
     <div class="prep-card" id="prep-${idAttr}" data-prep-card="${dataAttr}" style="${cardStyle}">
       ${renderPrepRow("Pattern",     "pattern",  prep.pattern)}
       ${renderPrepRow("Key Insight", "insight",  prep.insight)}
